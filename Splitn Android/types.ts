@@ -55,6 +55,8 @@ export interface Receipt {
   itemStates: Record<string, ItemInstance[]>;
   /** Total impreso en el ticket, para contrastar con la suma de lineas. */
   detectedTotal: number | null;
+  /** Inclinacion que se corrigio al leerlo, en grados. */
+  skewDegrees?: number;
   createdAt: number;
   updatedAt: number;
   /** Miniatura en dataURL, para la lista del historial. */

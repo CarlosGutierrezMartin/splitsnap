@@ -1,15 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, Trash2, TriangleAlert, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, TriangleAlert, ArrowRight, CircleCheck, CircleHelp, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatEuros } from '../ocr/money';
+import { buildVerdict } from '../ocr/verdict';
 import type { ParsedItem } from '../types';
 
 interface ReviewViewProps {
   items: ParsedItem[];
   detectedTotal: number | null;
   receiptName: string;
+  /** Inclinacion corregida al leer, en grados. 0 si estaba recto. */
+  skewDegrees?: number;
   onChange: (items: ParsedItem[]) => void;
   onRename: (name: string) => void;
   onContinue: () => void;
@@ -40,17 +43,15 @@ function isUncertain(item: ParsedItem): boolean {
  * hacemos trivial de corregir.
  */
 export const ReviewView: React.FC<ReviewViewProps> = ({
-  items, detectedTotal, receiptName, onChange, onRename, onContinue,
+  items, detectedTotal, receiptName, skewDegrees = 0, onChange, onRename, onContinue,
 }) => {
   const { t } = useLanguage();
   const [nameDraft, setNameDraft] = useState(receiptName);
 
-  const sum = useMemo(
-    () => Math.round(items.reduce((acc, item) => acc + item.totalPrice, 0) * 100) / 100,
-    [items],
-  );
-
-  const mismatch = detectedTotal !== null && Math.abs(sum - detectedTotal) > 0.02;
+  // El veredicto se recalcula con cada correccion: corregir una linea puede
+  // hacer que el ticket pase a cuadrar, y eso hay que verlo al momento.
+  const verdict = useMemo(() => buildVerdict(items, detectedTotal), [items, detectedTotal]);
+  const sum = verdict.sum;
 
   /** Reescribe una linea manteniendo coherentes cantidad, precio y total. */
   const patchItem = (id: string, patch: Partial<ParsedItem>) => {
@@ -191,28 +192,73 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         {t.review.addLine}
       </Button>
 
-      <section className="mt-6 rounded-2xl bg-white p-4 dark:bg-gray-900">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500 dark:text-gray-400">{t.review.sum}</span>
-          <span className="text-xl font-black tabular-nums">{formatEuros(sum)}</span>
+      <section className="mt-6 overflow-hidden rounded-2xl bg-white dark:bg-gray-900">
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500 dark:text-gray-400">{t.review.sum}</span>
+            <span className="text-xl font-black tabular-nums">{formatEuros(sum)}</span>
+          </div>
+          {verdict.detectedTotal !== null && (
+            <div className="mt-1.5 flex items-center justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400">{t.review.printedTotal}</span>
+              <span className="tabular-nums text-gray-500 dark:text-gray-400">
+                {formatEuros(verdict.detectedTotal)}
+              </span>
+            </div>
+          )}
         </div>
-        {detectedTotal !== null && (
-          <div className="mt-1.5 flex items-center justify-between text-sm">
-            <span className="text-gray-500 dark:text-gray-400">{t.review.printedTotal}</span>
-            <span className="tabular-nums text-gray-500 dark:text-gray-400">{formatEuros(detectedTotal)}</span>
+
+        {/* El veredicto no es un porcentaje a proposito: lo que de verdad
+            dice si el ticket esta entero es que la suma cuadre con el total
+            impreso, no el promedio de confianzas del lector. */}
+        {verdict.level === 'balanced' && (
+          <p className="flex items-start gap-2 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+            <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            {t.review.verdictBalanced}
+          </p>
+        )}
+
+        {verdict.level === 'unverified' && (
+          <div className="bg-gray-50 p-4 dark:bg-gray-800/50">
+            <p className="flex items-start gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <CircleHelp className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              {t.review.verdictUnverified}
+            </p>
+            <p className="mt-1 pl-6 text-xs text-gray-500 dark:text-gray-400">
+              {t.review.verdictUnverifiedHint}
+            </p>
           </div>
         )}
 
-        {/* El desajuste se avisa pero nunca bloquea: el ticket puede llevar un
-            servicio aparte y quien decide es la persona, no el parser. */}
-        {mismatch && (
-          <div className="mt-3 rounded-xl bg-amber-50 p-3 dark:bg-amber-950/30">
-            <p className="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-400">
-              <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
-              {t.review.mismatch}
+        {verdict.level === 'mismatch' && (
+          <div className="bg-amber-50 p-4 dark:bg-amber-950/30">
+            <p className="flex items-start gap-2 text-sm font-semibold text-amber-700 dark:text-amber-400">
+              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              {verdict.difference === null
+                ? t.review.verdictNothingRead
+                : verdict.difference < 0
+                  ? t.review.verdictMissing(formatEuros(Math.abs(verdict.difference)))
+                  : t.review.verdictExtra(formatEuros(verdict.difference))}
             </p>
-            <p className="mt-1 pl-6 text-xs text-amber-600 dark:text-amber-500">{t.review.mismatchHint}</p>
+            <p className="mt-1 pl-6 text-xs text-amber-600 dark:text-amber-500">
+              {t.review.mismatchHint}
+            </p>
           </div>
+        )}
+
+        {verdict.uncertainItems > 0 && (
+          <p className="border-t border-gray-100 px-4 py-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            {t.review.verdictUncertainLines(verdict.uncertainItems)}
+          </p>
+        )}
+
+        {/* Que el ticket saliera torcido explica muchos fallos de lectura, asi
+            que conviene decirlo en vez de corregir en silencio. */}
+        {Math.abs(skewDegrees) > 0 && (
+          <p className="flex items-center gap-2 border-t border-gray-100 px-4 py-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            <RotateCcw className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            {t.review.straightened(Math.abs(skewDegrees))}
+          </p>
         )}
       </section>
 

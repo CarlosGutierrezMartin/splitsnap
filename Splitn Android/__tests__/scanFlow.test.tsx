@@ -94,6 +94,60 @@ describe('flujo de escaneo', () => {
     }, { timeout: 5000 });
   });
 
+  it('dice que el ticket cuadra cuando la suma coincide con el total', async () => {
+    await scanWith(TICKET);
+    await waitFor(() => {
+      expect(screen.getByText(/la suma cuadra|the sum matches/i)).toBeTruthy();
+    }, { timeout: 5000 });
+  });
+
+  it('dice cuánto falta cuando la suma no llega al total impreso', async () => {
+    // El precio de la tortilla se lee mal como 0,50 en vez de 8,50: el total
+    // impreso delata que faltan 8,00 sin que nadie tenga que sumar a mano.
+    await scanWith([
+      line('CERVEZA', 10, 100), priceLine('5,00', 100),
+      line('TORTILLA', 10, 130), priceLine('0,50', 130),
+      line('TOTAL', 10, 200), priceLine('13,50', 200),
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByText(/faltan.*8,00|8,00.*missing/i)).toBeTruthy();
+    }, { timeout: 5000 });
+  });
+
+  it('avisa de que no puede verificar cuando no hay total impreso', async () => {
+    await scanWith([
+      line('CERVEZA', 10, 100), priceLine('5,00', 100),
+      line('TORTILLA', 10, 130), priceLine('8,50', 130),
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByText(/no he encontrado el total|couldn't find the printed total/i)).toBeTruthy();
+    }, { timeout: 5000 });
+  });
+
+  it('recupera un ticket torcido que de otro modo perdería líneas', async () => {
+    // Mismo ticket rotado 7°, como una foto hecha a pulso. Sin enderezar, el
+    // nombre y su precio caen en filas distintas y las líneas se pierden.
+    const rad = (7 * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    const tilt = (l: OcrLine): OcrLine => {
+      const px = l.box.x + l.box.width / 2 - 200;
+      const py = l.box.centerY - 150;
+      const cxr = px * cos - py * sin + 200;
+      const cyr = px * sin + py * cos + 150;
+      return { ...l, box: { ...l.box, x: cxr - l.box.width / 2, y: cyr - 10, centerY: cyr } };
+    };
+
+    await scanWith(TICKET.map(tilt));
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('CERVEZA')).toBeTruthy();
+    }, { timeout: 5000 });
+    expect(screen.getByDisplayValue('TORTILLA')).toBeTruthy();
+  });
+
   it('muestra el error en pantalla cuando el OCR falla', async () => {
     scanReceipt.mockRejectedValue(new Error('boom'));
     const { container } = renderApp();

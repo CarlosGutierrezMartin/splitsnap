@@ -58,7 +58,15 @@ export function useReceipt() {
 
   /** Crea un ticket a partir de lo que ha leido el OCR. */
   const createReceipt = useCallback(
-    (items: ParsedItem[], options: { name?: string; detectedTotal?: number | null; thumbnail?: string } = {}) => {
+    (
+      items: ParsedItem[],
+      options: {
+        name?: string;
+        detectedTotal?: number | null;
+        thumbnail?: string;
+        skewDegrees?: number;
+      } = {},
+    ) => {
       const now = Date.now();
       const created: Receipt = {
         id: newId('receipt'),
@@ -70,6 +78,7 @@ export function useReceipt() {
         createdAt: now,
         updatedAt: now,
         ...(options.thumbnail ? { thumbnail: options.thumbnail } : {}),
+        ...(options.skewDegrees ? { skewDegrees: options.skewDegrees } : {}),
       };
       setReceipt(created);
       return created;

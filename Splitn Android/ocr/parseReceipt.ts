@@ -1,6 +1,8 @@
 import type { OcrLine } from './types';
 
 import { analyzeLayout, moneyCellsOf, normalize, rowPriceIn, type Column, type Layout } from './layout';
+import { deskew } from './deskew';
+import { buildVerdict, type Verdict } from './verdict';
 import type { ParsedItem } from '../types';
 
 /**
@@ -26,6 +28,10 @@ export interface ParseResult {
   warnings: ParseWarning[];
   /** Diagnostico por fila, para la pantalla de revision y el banco de pruebas. */
   diagnostics: RowDiagnostic[];
+  /** Si el ticket se ha leido entero y bien. */
+  verdict: Verdict;
+  /** Inclinacion corregida, en grados. 0 si el ticket estaba recto. */
+  skewDegrees: number;
 }
 
 export type ParseWarning =
@@ -302,7 +308,11 @@ function* combinations<T>(items: T[], size: number): Generator<T[]> {
 
 /** Punto de entrada: lineas de OCR -> articulos del ticket. */
 export function parseReceipt(lines: OcrLine[]): ParseResult {
-  const rows = groupIntoRows(lines);
+  // Enderezar antes de agrupar no es opcional: `groupIntoRows` reparte por
+  // coordenada Y, asi que en un ticket torcido el nombre y su precio caen en
+  // filas distintas y la linea se pierde sin que salte ningun error.
+  const { lines: straight, angle } = deskew(lines);
+  const rows = groupIntoRows(straight);
   const layout = analyzeLayout(rows);
   const detectedTotal = findTotal(rows, layout.priceColumn);
 
@@ -333,5 +343,12 @@ export function parseReceipt(lines: OcrLine[]): ParseResult {
     warnings.push({ kind: 'total-mismatch', sum, detectedTotal });
   }
 
-  return { items, detectedTotal, warnings, diagnostics };
+  return {
+    items,
+    detectedTotal,
+    warnings,
+    diagnostics,
+    verdict: buildVerdict(items, detectedTotal),
+    skewDegrees: Math.round(((angle * 180) / Math.PI) * 10) / 10,
+  };
 }
