@@ -4,7 +4,7 @@ interface AvatarProps {
   name: string;
   /** Indice estable del participante: fija el color aunque se le renombre. */
   colorSeed?: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -20,6 +20,9 @@ const GRADIENTS = [
 ];
 
 const SIZES = {
+  // xs es el de la pila solapada del historial, donde solo hace falta
+  // reconocer de un vistazo cuanta gente hay en cada ticket.
+  xs: 'w-[26px] h-[26px] text-[10px]',
   sm: 'w-8 h-8 text-xs',
   md: 'w-11 h-11 text-sm',
   lg: 'w-14 h-14 text-lg',

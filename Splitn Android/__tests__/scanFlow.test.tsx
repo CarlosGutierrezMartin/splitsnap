@@ -58,7 +58,7 @@ async function scanWith(lines: OcrLine[]) {
   scanReceipt.mockResolvedValue({ lines, image: { width: 400, height: 300 }, elapsedMs: 10 });
   const { container } = renderApp();
 
-  fireEvent.click(await screen.findByRole('button', { name: /escanear ticket|scan receipt/i }));
+  fireEvent.click(await within(await screen.findByRole('main')).findByRole('button', { name: /^(escanear|scan)$/i }));
 
   const input = container.querySelector('input[type=file]') as HTMLInputElement;
   const file = new File([new Uint8Array([1, 2, 3])], 'ticket.png', { type: 'image/png' });
@@ -72,6 +72,9 @@ async function scanWith(lines: OcrLine[]) {
 beforeEach(() => {
   scanReceipt.mockReset();
   localStorage.clear();
+  // La presentacion sale una sola vez; estos tests van del flujo de escaneo,
+  // asi que se parte de una app ya conocida.
+  localStorage.setItem('splitn:onboarded', '1');
 });
 
 describe('flujo de escaneo', () => {
@@ -170,10 +173,11 @@ describe('flujo de escaneo', () => {
     fireEvent.change(campo, { target: { value: 'Cena del viernes' } });
     fireEvent.click(within(dialogo).getByRole('button', { name: /guardar|save/i }));
 
-    // El nombre nuevo sale en la cabecera del reparto y tambien en la barra
-    // superior, asi que se comprueban los dos sitios.
+    // El nombre vive en un solo sitio, el titulo de la barra superior, que
+    // es tambien desde donde se renombra.
     await waitFor(() => {
-      expect(screen.getAllByText('Cena del viernes').length).toBeGreaterThanOrEqual(2);
+      expect(within(screen.getByRole('navigation'))
+        .getByRole('button', { name: /cena del viernes/i })).toBeTruthy();
     }, { timeout: 5000 });
   });
 
@@ -181,7 +185,7 @@ describe('flujo de escaneo', () => {
     scanReceipt.mockRejectedValue(new Error('boom'));
     const { container } = renderApp();
 
-    fireEvent.click(await screen.findByRole('button', { name: /escanear ticket|scan receipt/i }));
+    fireEvent.click(await within(await screen.findByRole('main')).findByRole('button', { name: /^(escanear|scan)$/i }));
 
     const input = container.querySelector('input[type=file]') as HTMLInputElement;
     const file = new File([new Uint8Array([1])], 't.png', { type: 'image/png' });

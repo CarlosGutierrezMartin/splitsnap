@@ -89,13 +89,13 @@ export const InstallPrompt: React.FC = () => {
           exit={{ y: 80, opacity: 0 }}
           className="fixed inset-x-0 bottom-0 z-50 p-4"
         >
-          <div className="mx-auto flex max-w-xl items-start gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="mx-auto flex max-w-xl items-start gap-3 rounded-card border border-line bg-surface p-4 shadow-xl">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-primary/10 text-primary">
               {showIosHint ? <Share className="h-5 w-5" aria-hidden="true" /> : <Download className="h-5 w-5" aria-hidden="true" />}
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-bold">{showIosHint ? t.install.iosTitle : t.install.title}</p>
-              <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-0.5 text-sm text-muted">
                 {showIosHint ? t.install.iosBody : t.install.body}
               </p>
               {!showIosHint && (
@@ -106,7 +106,7 @@ export const InstallPrompt: React.FC = () => {
               type="button"
               onClick={dismiss}
               aria-label={t.install.dismiss}
-              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="rounded-lg p-1.5 text-faint transition-colors hover:bg-hair"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>

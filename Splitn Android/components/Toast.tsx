@@ -24,7 +24,7 @@ export const Toast: React.FC<ToastProps> = ({ message, onDismiss, durationMs = 3
           exit={{ opacity: 0, y: 20 }}
           role="status"
           aria-live="polite"
-          className="fixed inset-x-0 bottom-24 z-[60] mx-auto w-fit max-w-[90vw] rounded-full bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow-xl dark:bg-gray-100 dark:text-gray-900"
+          className="fixed inset-x-0 bottom-24 z-[60] mx-auto w-fit max-w-[90vw] rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas shadow-xl"
         >
           {message}
         </motion.div>

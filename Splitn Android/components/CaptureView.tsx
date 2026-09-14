@@ -23,21 +23,21 @@ export const CaptureView: React.FC<CaptureViewProps> = ({ onSelect }) => {
     <div className="mx-auto w-full max-w-xl px-4 pb-28 pt-6 animate-fade-in">
       <header className="mb-6 text-center">
         <h2 className="text-2xl font-black tracking-tight">{t.capture.title}</h2>
-        <p className="mt-1 text-gray-500 dark:text-gray-400">{t.capture.subtitle}</p>
+        <p className="mt-1 text-muted">{t.capture.subtitle}</p>
       </header>
 
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
         onDrop={(e) => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
-        className={`mb-6 flex aspect-[4/5] w-full flex-col items-center justify-center rounded-3xl border-4 border-dashed transition-colors ${
+        className={`mb-6 flex aspect-[4/5] w-full flex-col items-center justify-center rounded-hero border-4 border-dashed transition-colors ${
           dragging
             ? 'border-primary bg-primary/5'
-            : 'border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900'
+            : 'border-ghost bg-surface'
         }`}
       >
-        <Camera className="mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" aria-hidden="true" />
-        <p className="px-8 text-center text-sm text-gray-400 dark:text-gray-500">
+        <Camera className="mb-4 h-16 w-16 text-ghost" aria-hidden="true" />
+        <p className="px-8 text-center text-sm text-faint">
           {dragging ? t.capture.dropHere : t.capture.subtitle}
         </p>
       </div>
@@ -64,12 +64,12 @@ export const CaptureView: React.FC<CaptureViewProps> = ({ onSelect }) => {
         </Button>
       </div>
 
-      <section className="mt-8 rounded-2xl bg-white p-5 dark:bg-gray-900">
-        <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+      <section className="mt-8 rounded-card bg-surface p-5">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-muted">
           <Lightbulb className="h-4 w-4" aria-hidden="true" />
           {t.capture.tips}
         </h3>
-        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+        <ul className="space-y-2 text-sm text-muted">
           {[t.capture.tipFlat, t.capture.tipLight, t.capture.tipFull].map((tip) => (
             <li key={tip} className="flex gap-2">
               <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
@@ -79,7 +79,7 @@ export const CaptureView: React.FC<CaptureViewProps> = ({ onSelect }) => {
         </ul>
       </section>
 
-      <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-gray-400 dark:text-gray-500">
+      <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-faint">
         <ShieldCheck className="h-4 w-4" aria-hidden="true" />
         {t.capture.privacy}
       </p>

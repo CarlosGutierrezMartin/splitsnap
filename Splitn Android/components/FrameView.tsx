@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { RotateCcw, RotateCw, Check, X, Maximize } from 'lucide-react';
+import { RotateCcw, RotateCw, Check, X, Maximize, Sparkles } from 'lucide-react';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { applyCrop, FULL_CROP, rotatedBounds, type CropRect } from '../lib/imageCrop';
+import { detectDocumentInImage } from '../lib/detectEdges';
 
 interface FrameViewProps {
   file: File;
@@ -34,8 +35,28 @@ export const FrameView: React.FC<FrameViewProps> = ({ file, onConfirm, onCancel 
   const [degrees, setDegrees] = useState(0);
   const [working, setWorking] = useState(false);
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
+  // Recorte propuesto automaticamente. Se guarda aparte del actual para poder
+  // volver a el despues de tocarlo a mano.
+  const [suggested, setSuggested] = useState<CropRect | null>(null);
   const areaRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ handle: Handle | 'move'; startX: number; startY: number; start: CropRect } | null>(null);
+
+  /**
+   * Se propone el recorte del papel nada mas abrir.
+   *
+   * Es una propuesta, no una imposicion: se aplica sola porque acertar es lo
+   * habitual y ahorra el trabajo, pero queda el boton de deshacer para volver
+   * a la foto entera de un toque.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    void detectDocumentInImage(file).then((detected) => {
+      if (cancelled || !detected) return;
+      setSuggested(detected);
+      setCrop(detected);
+    });
+    return () => { cancelled = true; };
+  }, [file]);
 
   useEffect(() => {
     const objectUrl = URL.createObjectURL(file);
@@ -122,7 +143,9 @@ export const FrameView: React.FC<FrameViewProps> = ({ file, onConfirm, onCancel 
     <div className="mx-auto w-full max-w-xl px-4 pb-44 pt-3 animate-fade-in">
       <header className="mb-3 text-center">
         <h2 className="text-lg font-bold">{t.frame.title}</h2>
-        <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{t.frame.subtitle}</p>
+        <p className="mt-0.5 text-sm text-muted">
+          {suggested ? t.frame.detected : t.frame.subtitle}
+        </p>
       </header>
 
       {/* El area de vista tiene que coincidir EXACTAMENTE con lo que compone
@@ -139,7 +162,7 @@ export const FrameView: React.FC<FrameViewProps> = ({ file, onConfirm, onCancel 
         <div
           ref={areaRef}
           style={bounds ? { aspectRatio: `${bounds.width} / ${bounds.height}` } : undefined}
-          className="relative w-full max-w-md touch-none select-none overflow-hidden rounded-2xl bg-gray-900"
+          className="relative w-full max-w-md touch-none select-none overflow-hidden rounded-card bg-gray-900"
         >
           {url && (
             <img
@@ -216,9 +239,19 @@ export const FrameView: React.FC<FrameViewProps> = ({ file, onConfirm, onCancel 
         >
           <Maximize className="h-5 w-5" aria-hidden="true" />
         </Button>
+
+        {suggested && (
+          <Button
+            variant="ghost"
+            onClick={() => setCrop(suggested)}
+            aria-label={t.frame.useSuggestion}
+          >
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          </Button>
+        )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 p-4 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 p-4 backdrop-blur">
         <div className="mx-auto flex max-w-xl gap-3">
           <Button variant="outline" onClick={onCancel} aria-label={t.common.cancel}>
             <X className="h-5 w-5" aria-hidden="true" />

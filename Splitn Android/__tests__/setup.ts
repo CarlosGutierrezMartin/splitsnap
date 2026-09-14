@@ -1,4 +1,4 @@
-import { afterEach } from 'vitest';
+import { afterEach, beforeEach } from 'vitest';
 
 // Este setup corre para toda la suite, tambien para los tests de logica pura
 // que van en node. Todo lo que toque el DOM se salta cuando no hay ventana.
@@ -24,6 +24,13 @@ if (typeof window !== 'undefined') {
     URL.createObjectURL = () => 'blob:test';
     URL.revokeObjectURL = () => {};
   }
+
+  // La presentacion de arranque tapa la app durante cuatro segundos. Los
+  // tests parten de una persona que ya la ha visto, que es el caso normal:
+  // solo el test que la comprueba borra esta marca.
+  beforeEach(() => {
+    sessionStorage.setItem('splitn:splash', '1');
+  });
 
   afterEach(cleanup);
 }
