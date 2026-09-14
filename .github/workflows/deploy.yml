@@ -46,6 +46,11 @@ jobs:
           BASE_PATH: /${{ github.event.repository.name }}/
 
       - uses: actions/configure-pages@v5
+        with:
+          # Activa GitHub Pages con "GitHub Actions" como origen si aún no lo
+          # está. Sin esto haría falta entrar a mano en Settings → Pages antes
+          # del primer despliegue, y el workflow fallaría hasta entonces.
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

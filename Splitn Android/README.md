@@ -70,8 +70,13 @@ npm run make-icons   # regenera los iconos de la PWA desde scripts/make-icons.mj
 `.github/workflows/deploy.yml` publica en GitHub Pages en cada push a `main`, pasando `BASE_PATH` para
 que las rutas cuelguen de `/<repo>/`.
 
-> GitHub Pages en un repositorio **privado** requiere GitHub Pro. Si no lo tienes, el mismo `dist/`
-> se puede publicar en Cloudflare Pages o Netlify sin tocar el código: solo cambia el workflow.
+El workflow activa GitHub Pages por sí mismo en el primer despliegue, así que no hay que tocar nada en
+Settings. Una vez fusionado en `main`, la aplicación queda en:
+
+**https://carlosgutierrezmartin.github.io/splitsnap/**
+
+> Si algún día el repositorio pasa a ser privado, Pages exigiría GitHub Pro. En ese caso el mismo `dist/`
+> se publica en Cloudflare Pages o Netlify sin tocar el código: solo cambia el workflow.
 
 ## Licencia de los modelos
 
