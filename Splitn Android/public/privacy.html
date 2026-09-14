@@ -1,149 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Splitn</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h1 {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            color: #111;
-        }
-
-        h2 {
-            margin-top: 30px;
-            color: #222;
-        }
-
-        h3 {
-            margin-top: 20px;
-            color: #444;
-        }
-
-        ul {
-            margin-bottom: 20px;
-        }
-
-        li {
-            margin-bottom: 8px;
-        }
-
-        .last-updated {
-            color: #666;
-            font-style: italic;
-            margin-bottom: 30px;
-        }
-
-        .contact-box {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 40px;
-            border: 1px solid #eee;
-        }
-
-        a {
-            color: #2563eb;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacidad · Splitn</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.65; max-width: 720px; margin: 0 auto; padding: 24px 20px 64px;
+      color: #1f2937; background: #ffffff;
+    }
+    h1 { border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; }
+    h2 { margin-top: 36px; }
+    .highlight { background: #eff6ff; border-left: 4px solid #2a7de1; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+    li { margin-bottom: 8px; }
+    footer { margin-top: 48px; font-size: 14px; color: #6b7280; }
+    @media (prefers-color-scheme: dark) {
+      body { color: #e5e7eb; background: #0b0f19; }
+      h1 { border-color: #1f2937; }
+      .highlight { background: #11203a; }
+      footer { color: #9ca3af; }
+    }
+  </style>
 </head>
 
 <body>
+  <h1>Política de privacidad</h1>
+  <p><strong>Última actualización:</strong> 14 de septiembre de 2026</p>
 
-    <h1>Privacy Policy</h1>
-    <p class="last-updated">Last Updated: January 2, 2026</p>
+  <div class="highlight">
+    <p><strong>Splitn no recoge ningún dato.</strong> No hay cuentas de usuario, no hay servidores propios y
+      no existe ninguna base de datos a la que se envíe información. Todo ocurre dentro de tu navegador.</p>
+  </div>
 
-    <p>Introduction</p>
-    <p>Splitn ("we," "our," or "us") is committed to protecting your privacy and ensuring the security of your
-        personal data. This Privacy Policy explains completely and transparently how we collect, use, process, and store
-        your information when you use the Splitn mobile application and website (the "Service").</p>
-    <p>By using the Service, you consent to the data practices described in this policy.</p>
+  <h2>Las fotos de tus tickets</h2>
+  <p>La imagen del ticket se procesa <strong>íntegramente en tu dispositivo</strong>, con un modelo de
+    reconocimiento de texto que se descarga y se ejecuta en el propio navegador. La foto no se sube a
+    ningún servidor, no se envía a ningún servicio de terceros y no se almacena en ninguna parte fuera de
+    tu dispositivo.</p>
 
-    <h2>1. Information We Collect</h2>
+  <h2>Qué se guarda y dónde</h2>
+  <p>Los tickets que escaneas, los participantes que añades y el reparto que haces se guardan en el
+    almacenamiento local de tu navegador (IndexedDB), junto con tus preferencias de idioma y tema
+    (localStorage). Esa información:</p>
+  <ul>
+    <li>No sale de tu dispositivo.</li>
+    <li>No es accesible para nosotros ni para nadie más.</li>
+    <li>Desaparece si borras los datos del navegador o desinstalas la aplicación.</li>
+  </ul>
+  <p>Puedes eliminar cualquier ticket en cualquier momento desde la pantalla de inicio.</p>
 
-    <h3>A. Information You Provide Directly</h3>
-    <ul>
-        <li><strong>Account Information:</strong> If you choose to create an account, we collect your email address and
-            authentication credentials (via Google or Email provider).</li>
-        <li><strong>User Content:</strong> We collect images of receipts you upload to the Service for the sole purpose
-            of processing and extracting potential line items.</li>
-        <li><strong>Session Data:</strong> We collect names of participants you manually add to a receipt splitting
-            session.</li>
-    </ul>
+  <h2>Conexiones de red</h2>
+  <p>Splitn solo hace peticiones de red en dos casos:</p>
+  <ul>
+    <li><strong>Al cargar la aplicación</strong>, para descargar sus propios archivos del servidor donde
+      está alojada.</li>
+    <li><strong>La primera vez que escaneas un ticket</strong>, para descargar el modelo de reconocimiento
+      de texto. Una vez descargado queda en caché y la aplicación funciona sin conexión.</li>
+  </ul>
+  <p>Ninguna de esas peticiones incluye datos tuyos ni contenido de tus tickets.</p>
 
-    <h3>B. Information Collected Automatically</h3>
-    <ul>
-        <li><strong>Usage Data:</strong> We collect anonymous data about how you interact with our app (e.g., screens
-            visited, buttons clicked) to improve user experience.</li>
-        <li><strong>Device Information:</strong> We may collect information about your device type, operating system,
-            and unique device identifiers for diagnostic and security purposes.</li>
-        <li><strong>Crash Logs:</strong> In the event of an error, we may collect crash reports to help us fix bugs.
-        </li>
-    </ul>
+  <h2>Sin seguimiento</h2>
+  <p>No se usan cookies de seguimiento, ni analítica, ni publicidad, ni identificadores de dispositivo.</p>
 
-    <h2>2. How We Use Your Information</h2>
-    <p>We use the collected information for the following specific purposes:</p>
-    <ul>
-        <li><strong>To Provide the Service:</strong> To process receipt images using AI, allowing you to split costs
-            with friends.</li>
-        <li><strong>To Maintain Your Account:</strong> To manage your login sessions and save your history.</li>
-        <li><strong>To Improve Our App:</strong> To analyze usage trends and develop new features.</li>
-        <li><strong>Security:</strong> To detect, prevent, and address technical issues or fraud.</li>
-    </ul>
+  <h2>Al compartir un reparto</h2>
+  <p>Cuando pulsas «Compartir», tu sistema operativo te deja elegir la aplicación de destino (mensajería,
+    correo, etc.). A partir de ese momento, el contenido que envías queda sujeto a la política de privacidad
+    de la aplicación que hayas elegido. Splitn no interviene en ese envío.</p>
 
-    <h2>3. Data Sharing and Third Parties</h2>
-    <p>We do not sell your personal data. We share data only with trusted third-party service providers necessary to
-        operate the Service:</p>
-    <ul>
-        <li><strong>Google Firebase:</strong> Used for secure authentication, database hosting, and analytics.</li>
-        <li><strong>Google Gemini API:</strong> Used for AI processing of receipt images. Images are processed securely
-            and are not used by Google to train their public models (per enterprise API terms).</li>
-    </ul>
+  <h2>Menores</h2>
+  <p>La aplicación no recoge datos de nadie, independientemente de su edad.</p>
 
-    <h2>4. Data Retention and Deletion</h2>
-    <ul>
-        <li><strong>Auto-Deletion:</strong> To minimize data retention, all receipt sessions (including images and
-            extracted data) are automatically deleted from our servers <strong>30 days</strong> after the last activity
-            in that session.</li>
-        <li><strong>Manual Deletion:</strong> You can delete specific sessions instantly through the app interface.</li>
-        <li><strong>Account Deletion:</strong> You may request full deletion of your account and all associated data by
-            contacting us or using the in-app deletion request (if available).</li>
-    </ul>
+  <h2>Cambios</h2>
+  <p>Si esta política cambia, se actualizará la fecha del encabezado.</p>
 
-    <h2>5. Security</h2>
-    <p>We hold your data on secure servers provided by Google Cloud Platform. We implement industry-standard encryption
-        (TLS/SSL) for data in transit and encryption at rest for sensitive database records.</p>
-
-    <h2>6. Children's Privacy</h2>
-    <p>Our Service is not intended for use by children under the age of 13. We do not knowingly collect personal
-        information from children under 13.</p>
-
-    <h2>7. Changes to This Policy</h2>
-    <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy
-        on this page and updating the "Last Updated" date.</p>
-
-    <div class="contact-box">
-        <h2>8. Contact Us</h2>
-        <p>If you have any questions about this Privacy Policy or our data practices, please contact us at:</p>
-        <p><strong>Email:</strong> support@Splitn</p>
-    </div>
-
+  <footer>
+    <p>Splitn es software libre. Puedes revisar el código para comprobar cualquier afirmación de esta
+      página.</p>
+  </footer>
 </body>
 
 </html>

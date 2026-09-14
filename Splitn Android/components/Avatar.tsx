@@ -1,70 +1,52 @@
 import React, { useMemo } from 'react';
 
 interface AvatarProps {
-    name: string;
-    size?: 'sm' | 'md' | 'lg' | 'xl';
-    className?: string;
+  name: string;
+  /** Indice estable del participante: fija el color aunque se le renombre. */
+  colorSeed?: number;
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
 const GRADIENTS = [
-    'from-red-400 to-orange-400',
-    'from-orange-400 to-amber-400',
-    'from-amber-400 to-yellow-400',
-    'from-lime-400 to-green-400',
-    'from-emerald-400 to-teal-400',
-    'from-teal-400 to-cyan-400',
-    'from-cyan-400 to-sky-400',
-    'from-blue-400 to-indigo-400',
-    'from-indigo-400 to-violet-400',
-    'from-violet-400 to-purple-400',
-    'from-purple-400 to-fuchsia-400',
-    'from-pink-400 to-rose-400',
+  'from-rose-400 to-orange-400',
+  'from-amber-400 to-yellow-400',
+  'from-lime-400 to-emerald-400',
+  'from-teal-400 to-cyan-400',
+  'from-sky-400 to-blue-500',
+  'from-indigo-400 to-violet-500',
+  'from-fuchsia-400 to-pink-500',
+  'from-slate-400 to-slate-600',
 ];
 
 const SIZES = {
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm',
-    lg: 'w-12 h-12 text-base',
-    xl: 'w-16 h-16 text-xl',
+  sm: 'w-8 h-8 text-xs',
+  md: 'w-11 h-11 text-sm',
+  lg: 'w-14 h-14 text-lg',
 };
 
-export const Avatar: React.FC<AvatarProps> = ({
-    name,
-    size = 'md',
-    className = ''
-}) => {
-    const initials = useMemo(() => {
-        return name
-            .split(' ')
-            .map(part => part[0])
-            .slice(0, 2)
-            .join('')
-            .toUpperCase();
-    }, [name]);
+export const Avatar: React.FC<AvatarProps> = ({ name, colorSeed, size = 'md', className = '' }) => {
+  const initials = useMemo(() => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '?';
+    return parts.slice(0, 2).map((part) => part[0] ?? '').join('').toUpperCase();
+  }, [name]);
 
-    const gradient = useMemo(() => {
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const index = Math.abs(hash) % GRADIENTS.length;
-        return GRADIENTS[index];
-    }, [name]);
+  // Si hay indice se usa; si no, se deriva del nombre para que dos avatares
+  // del mismo nombre salgan siempre iguales.
+  const gradient = useMemo(() => {
+    if (colorSeed !== undefined) return GRADIENTS[colorSeed % GRADIENTS.length]!;
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return GRADIENTS[Math.abs(hash) % GRADIENTS.length]!;
+  }, [name, colorSeed]);
 
-    return (
-        <div
-            className={`
-        ${SIZES[size]} 
-        rounded-full 
-        bg-gradient-to-br ${gradient} 
-        flex items-center justify-center 
-        text-white font-bold 
-        shadow-sm 
-        select-none
-        ${className}
-      `}
-        >
-            {initials}
-        </div>
-    );
+  return (
+    <div
+      aria-hidden="true"
+      className={`${SIZES[size]} shrink-0 rounded-full bg-gradient-to-br ${gradient} flex select-none items-center justify-center font-bold text-white shadow-sm ${className}`}
+    >
+      {initials}
+    </div>
+  );
 };
