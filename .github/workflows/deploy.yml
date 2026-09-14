@@ -45,12 +45,12 @@ jobs:
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
 
+      # Requiere que GitHub Pages ya esté activado en Settings → Pages con
+      # "GitHub Actions" como origen. Es un paso manual de una sola vez: el
+      # GITHUB_TOKEN de Actions no puede crear el sitio de Pages por sí mismo
+      # ("Resource not accessible by integration"), así que `enablement: true`
+      # no sirve de nada aquí.
       - uses: actions/configure-pages@v5
-        with:
-          # Activa GitHub Pages con "GitHub Actions" como origen si aún no lo
-          # está. Sin esto haría falta entrar a mano en Settings → Pages antes
-          # del primer despliegue, y el workflow fallaría hasta entonces.
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
