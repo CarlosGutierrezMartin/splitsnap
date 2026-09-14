@@ -1,6 +1,7 @@
 import type * as PaddleOcrModule from '@paddleocr/paddleocr-js';
 import type { OcrLine, OcrOutput, OcrStatus } from './types';
 import { preprocessReceipt } from './preprocess';
+import { markScanImageSize, markScanPhase } from '../lib/crashReport';
 
 /**
  * Motor de OCR: PP-OCRv5 mobile (Apache-2.0) sobre ONNX Runtime Web.
@@ -166,9 +167,15 @@ function toBoundingBox(poly: number[][]): OcrLine['box'] {
  */
 export async function scanReceipt(image: Blob): Promise<OcrOutput> {
   const ocr = await loadOcrEngine();
+
+  markScanPhase('preprocess');
   const { bitmap } = await preprocessReceipt(image);
+  // El numero de pixeles es el factor que dispara la memoria: una foto de 12
+  // megapixeles pesa decenas de MB ya solo decodificada.
+  markScanImageSize(bitmap.width * bitmap.height);
 
   try {
+    markScanPhase('inference');
     const [result] = await ocr.predict(bitmap, {
       // Los tickets son estrechos y muy altos; dejamos margen para que el
       // detector no recorte la parte de abajo, donde suele estar el total.
