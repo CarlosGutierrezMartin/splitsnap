@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronRight, Receipt, Trash2, WifiOff } from 'lucide-react';
+import { Camera, ChevronRight, Pencil, Receipt, Trash2, WifiOff } from 'lucide-react';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatEuros } from '../ocr/money';
@@ -12,6 +12,7 @@ interface HomeViewProps {
   onScan: () => void;
   onOpen: (receipt: ReceiptModel) => void;
   onDelete: (receiptId: string) => void;
+  onRename: (receipt: ReceiptModel) => void;
 }
 
 function formatWhen(timestamp: number, locale: string): string {
@@ -24,7 +25,9 @@ function formatWhen(timestamp: number, locale: string): string {
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(timestamp);
 }
 
-export const HomeView: React.FC<HomeViewProps> = ({ history, loading, onScan, onOpen, onDelete }) => {
+export const HomeView: React.FC<HomeViewProps> = ({
+  history, loading, onScan, onOpen, onDelete, onRename,
+}) => {
   const { t, language } = useLanguage();
 
   return (
@@ -87,6 +90,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ history, loading, onScan, on
                     </div>
                     <span className="shrink-0 font-bold tabular-nums">{formatEuros(total)}</span>
                     <ChevronRight className="h-4 w-4 shrink-0 text-gray-300" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onRename(receipt)}
+                    aria-label={`${t.common.edit}: ${receipt.name}`}
+                    className="rounded-lg p-2 text-gray-300 transition-colors hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800"
+                  >
+                    <Pencil className="h-4 w-4" aria-hidden="true" />
                   </button>
                   <button
                     type="button"

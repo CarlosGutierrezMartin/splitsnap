@@ -114,10 +114,37 @@ export function computeTotals(receipt: Receipt): Totals {
 }
 
 /**
+ * Fija cuantas partes de una unidad tiene un participante.
+ *
+ * Es lo que permite coger varias partes de la misma unidad: con una tortilla
+ * partida en cinco, alguien puede quedarse dos quintos. El interruptor de
+ * antes solo sabia poner uno o ninguno, asi que 2/5 era inexpresable.
+ *
+ * El valor se acota a lo que queda libre mas lo que ya tenia esa persona:
+ * nadie puede reclamar mas partes de las que hay.
+ */
+export function setParticipantParts(
+  instance: ItemInstance,
+  participantId: string,
+  parts: number,
+): ItemInstance {
+  const mine = instance.claims[participantId] ?? 0;
+  const available = freeParts(instance) + mine;
+  const next = Math.max(0, Math.min(available, Math.round(parts)));
+
+  const claims = { ...instance.claims };
+  if (next === 0) delete claims[participantId];
+  else claims[participantId] = next;
+
+  return { ...instance, claims };
+}
+
+/**
  * Reclama o suelta una parte de una unidad para un participante.
  *
  * Un solo gesto alterna entre los dos estados: si ya tengo parte, la suelto;
- * si no y queda sitio, la cojo.
+ * si no y queda sitio, la cojo. Sigue siendo lo natural para unidades
+ * enteras; para unidades partidas se usa `setParticipantParts`.
  */
 export function togglePart(
   instance: ItemInstance,

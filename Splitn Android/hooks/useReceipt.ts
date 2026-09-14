@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ItemInstance, ParsedItem, Receipt } from '../types';
 import { createItemStates, removeParticipantClaims } from '../lib/split';
-import { deleteReceipt, listReceipts, saveReceipt } from '../storage/db';
+import { deleteReceipt, getReceipt, listReceipts, saveReceipt } from '../storage/db';
 
 /**
  * Estado del ticket activo y del historial.
@@ -95,6 +95,33 @@ export function useReceipt() {
   const rename = useCallback((name: string) => update((current) => ({ ...current, name })), [update]);
 
   /**
+   * Renombra cualquier ticket, este abierto o no.
+   *
+   * El historial se guarda en IndexedDB, asi que renombrar uno antiguo exige
+   * leerlo, escribirlo y refrescar la lista. Si resulta ser el ticket activo
+   * se actualiza tambien en memoria, o la pantalla seguiria con el nombre
+   * viejo hasta recargar.
+   */
+  const renameReceipt = useCallback(
+    async (receiptId: string, name: string) => {
+      const clean = name.trim();
+      if (!clean) return;
+
+      setHistory((current) =>
+        current.map((r) => (r.id === receiptId ? { ...r, name: clean, updatedAt: Date.now() } : r)),
+      );
+
+      const stored = await getReceipt(receiptId);
+      if (stored) await saveReceipt({ ...stored, name: clean, updatedAt: Date.now() });
+
+      setReceipt((current) =>
+        current?.id === receiptId ? { ...current, name: clean, updatedAt: Date.now() } : current,
+      );
+    },
+    [],
+  );
+
+  /**
    * Reemplaza la lista de articulos tras la revision manual.
    * Se regenera el reparto porque las unidades pueden haber cambiado.
    */
@@ -174,6 +201,7 @@ export function useReceipt() {
     openReceipt,
     closeReceipt,
     rename,
+    renameReceipt,
     replaceItems,
     addParticipant,
     renameParticipant,

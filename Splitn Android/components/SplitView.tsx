@@ -15,11 +15,12 @@ interface SplitViewProps {
   onAssign: (participantId: string) => void;
   onUpdateItemStates: (itemStates: Record<string, ItemInstance[]>) => void;
   onShare: () => void;
+  onRename: () => void;
 }
 
 /** Panel principal del reparto: quién paga qué y cuánto falta por asignar. */
 export const SplitView: React.FC<SplitViewProps> = ({
-  receipt, onAddParticipant, onRemoveParticipant, onAssign, onUpdateItemStates, onShare,
+  receipt, onAddParticipant, onRemoveParticipant, onAssign, onUpdateItemStates, onShare, onRename,
 }) => {
   const { t } = useLanguage();
   const [newName, setNewName] = useState('');
@@ -36,6 +37,19 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 pb-32 pt-5 animate-fade-in">
+      {/* El nombre se puede cambiar tambien aqui: antes solo se podia al
+          revisar, y pasado ese momento el ticket quedaba con el nombre para
+          siempre. */}
+      <button
+        type="button"
+        onClick={onRename}
+        className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-center transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        <span className="truncate text-lg font-bold">{receipt.name}</span>
+        <Pencil className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+        <span className="sr-only">{t.review.receiptName}</span>
+      </button>
+
       <section className="mb-6 overflow-hidden rounded-3xl bg-white shadow-sm dark:bg-gray-900">
         <div className="border-b border-gray-100 bg-primary/5 p-6 text-center dark:border-gray-800 dark:bg-primary/10">
           <p className="mb-1 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
