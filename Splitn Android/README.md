@@ -70,8 +70,11 @@ npm run make-icons   # regenera los iconos de la PWA desde scripts/make-icons.mj
 `.github/workflows/deploy.yml` publica en GitHub Pages en cada push a `main`, pasando `BASE_PATH` para
 que las rutas cuelguen de `/<repo>/`.
 
-El workflow activa GitHub Pages por sí mismo en el primer despliegue, así que no hay que tocar nada en
-Settings. Una vez fusionado en `main`, la aplicación queda en:
+**Paso manual, una sola vez:** activa GitHub Pages en *Settings → Pages* y elige **GitHub Actions** como
+origen (`Source`). El `GITHUB_TOKEN` de Actions no puede crear el sitio de Pages por sí mismo, así que sin
+este paso el despliegue falla con `Resource not accessible by integration`.
+
+Hecho eso, cada push a `main` publica la aplicación en:
 
 **https://carlosgutierrezmartin.github.io/splitsnap/**
 
