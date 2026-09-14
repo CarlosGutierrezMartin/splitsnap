@@ -1,6 +1,8 @@
 import type { OcrLine } from './types';
 
 import { analyzeLayout, moneyCellsOf, normalize, rowPriceIn, type Column, type Layout } from './layout';
+import { deskew } from './deskew';
+import { buildVerdict, type Verdict } from './verdict';
 import type { ParsedItem } from '../types';
 
 /**
@@ -26,6 +28,10 @@ export interface ParseResult {
   warnings: ParseWarning[];
   /** Diagnostico por fila, para la pantalla de revision y el banco de pruebas. */
   diagnostics: RowDiagnostic[];
+  /** Si el ticket se ha leido entero y bien. */
+  verdict: Verdict;
+  /** Inclinacion corregida, en grados. 0 si el ticket estaba recto. */
+  skewDegrees: number;
 }
 
 export type ParseWarning =
@@ -58,8 +64,39 @@ const NON_ITEM_KEYWORDS = [
   'DIRECCION', 'AVENIDA', 'WWW', 'HTTP',
 ];
 
-/** Cantidad al principio de la linea: "2", "2x", "2 x", "2 ud", "2uds". */
-const QUANTITY_PATTERN = /^(\d{1,3})\s*(?:[xX*]|UD|UDS|U|UNID|UNIDS)?\s*[-.)]?\s+/;
+/**
+ * Cantidad al principio de la linea: "2", "2x", "2 x", "2 ud", "2uds".
+ *
+ * El espacio final es opcional a proposito: el OCR se come con frecuencia el
+ * hueco estrecho entre la columna de unidades y el nombre, y devuelve
+ * "3COCA COLA" de una pieza. Que se pegue no puede costar la cantidad.
+ */
+const QUANTITY_PATTERN = /^(\d{1,3})(\s*)(?:[xX*]|UDS?|UNIDS?)?[\s.)-]*/;
+
+/** Tolerancia al comprobar si importe/precio da un entero, en centimos. */
+const RATIO_TOLERANCE_CENTS = 2;
+
+/**
+ * Deduce la cantidad dividiendo el importe de linea entre el precio unitario.
+ *
+ * Los tickets de restaurante espanoles llevan columnas PRECIO e IMPORTE, y
+ * eso es una comprobacion gratis: si 11,25 / 3,75 da 3 exacto, hay 3
+ * unidades. Funciona aunque el OCR lea mal el digito de la cantidad o lo
+ * pegue al nombre, que es justo lo que falla con "3COCA COLA".
+ */
+function quantityFromArithmetic(unitPrice: number, lineTotal: number): number | null {
+  const unitCents = Math.round(unitPrice * 100);
+  const totalCents = Math.round(lineTotal * 100);
+  if (unitCents <= 0 || totalCents < unitCents) return null;
+
+  const ratio = totalCents / unitCents;
+  const rounded = Math.round(ratio);
+  if (rounded < 1 || rounded > 99) return null;
+
+  // Se compara en centimos para no arrastrar el error del coma flotante.
+  if (Math.abs(rounded * unitCents - totalCents) > RATIO_TOLERANCE_CENTS) return null;
+  return rounded;
+}
 
 /** Umbral de aceptacion de la puntuacion combinada. */
 const ACCEPT_THRESHOLD = 0.5;
@@ -135,6 +172,30 @@ function findTotal(rows: OcrLine[][], column: Column | null): number | null {
   return best;
 }
 
+/**
+ * Quita del nombre el numero de la columna de unidades.
+ *
+ * Solo se recorta cuando es seguro: o bien venia separado por un espacio, o
+ * bien coincide con una cantidad mayor que uno ya deducida. Sin esa cautela,
+ * un producto como "7UP" o "1906" perderia parte de su nombre.
+ */
+function stripLeadingQuantity(
+  label: string,
+  match: RegExpExecArray | null,
+  quantity: number,
+): string {
+  if (!match) return label;
+
+  const hadSpace = (match[2] ?? '').length > 0;
+  const matchesQuantity = Number(match[1]) === quantity && quantity > 1;
+  // Un numero de tres cifras pegado no es una cantidad, es una referencia,
+  // y tampoco forma parte del nombre.
+  const looksLikeCode = (match[1] ?? '').length === 3;
+
+  if (hadSpace || matchesQuantity || looksLikeCode) return label.slice(match[0].length);
+  return label;
+}
+
 function cleanName(raw: string): string {
   return raw
     .replace(/[.…]{2,}/g, ' ')
@@ -188,26 +249,59 @@ function evaluateRow(
   if (columnCell) { score += 0.45; reasons.push('precio en la columna'); }
   else { score += 0.1; reasons.push('precio fuera de la columna'); }
 
-  if (inItemZone) { score += 0.15; reasons.push('dentro de la zona de articulos'); }
-  else { reasons.push('fuera de la zona de articulos'); }
+  if (!inItemZone) {
+    // Limite duro, no un matiz de puntuacion: por debajo del total solo hay
+    // formas de pago y despedidas. Un "PENDIENTE DE COBRO 293,00" tiene
+    // importe en columna y nombre con pinta de texto, asi que por puntuacion
+    // entraba como articulo y duplicaba el total del ticket.
+    return reject('fuera de la zona de articulos');
+  }
+  score += 0.15;
+  reasons.push('dentro de la zona de articulos');
 
   // Todo lo anterior al primer importe es la etiqueta: cantidad + nombre.
-  const label = text.slice(0, allMoney[0]!.charIndex >= 0 ? text.indexOf(allMoney[0]!.raw) : 0);
+  const label = text.slice(0, text.indexOf(allMoney[0]!.raw));
+
+  const lineTotal = priceCell.value;
+  if (lineTotal <= 0) return reject('importe no positivo');
+
+  // Los importes a la izquierda del de linea son candidatos a precio unitario.
+  const before = allMoney.filter((c) => c.rightX < priceCell.rightX);
+  const unitCandidate = before.length > 0 ? before[before.length - 1]!.value : null;
+
+  // 1) La aritmetica manda: importe / precio da la cantidad exacta.
+  const arithmeticQuantity =
+    unitCandidate !== null ? quantityFromArithmetic(unitCandidate, lineTotal) : null;
+
+  // 2) El texto, como respaldo y para contrastar.
+  const quantityMatch = QUANTITY_PATTERN.exec(label);
+  const textQuantityRaw = quantityMatch ? Number(quantityMatch[1]) : null;
+  const textQuantity =
+    textQuantityRaw !== null && textQuantityRaw >= 1 && textQuantityRaw <= 99 ? textQuantityRaw : null;
 
   let quantity = 1;
-  let nameSource = label;
-  const quantityMatch = QUANTITY_PATTERN.exec(label);
-  if (quantityMatch) {
-    nameSource = label.slice(quantityMatch[0].length);
-    const parsed = Number(quantityMatch[1]);
-    if (parsed >= 1 && parsed <= 99) {
-      quantity = parsed;
+  let unitPrice: number;
+
+  if (arithmeticQuantity !== null && unitCandidate !== null) {
+    quantity = arithmeticQuantity;
+    unitPrice = unitCandidate;
+    reasons.push(`cantidad ${quantity} deducida del importe`);
+    score += 0.2;
+    if (textQuantity === arithmeticQuantity) {
+      // Texto y aritmetica coinciden: no hay margen de duda en esta linea.
       score += 0.1;
-      reasons.push(`cantidad ${parsed}`);
+      reasons.push('la cantidad del texto coincide');
     }
+  } else if (textQuantity !== null) {
+    quantity = textQuantity;
+    unitPrice = lineTotal / quantity;
+    score += 0.1;
+    reasons.push(`cantidad ${quantity} del texto`);
+  } else {
+    unitPrice = lineTotal;
   }
 
-  const name = cleanName(nameSource);
+  const name = cleanName(stripLeadingQuantity(label, quantityMatch, quantity));
   const letters = (name.match(/[A-Za-zÀ-ÿ]/g) ?? []).length;
   if (name.length < 2 || letters === 0) return reject('sin nombre legible');
 
@@ -217,25 +311,8 @@ function evaluateRow(
   if (letterRatio >= 0.5) { score += 0.3; reasons.push('nombre con pinta de producto'); }
   else { reasons.push(`nombre poco alfabetico (${Math.round(letterRatio * 100)}%)`); }
 
+  score += rowScore(row) * 0.1;
   const confidence = rowScore(row);
-  score += confidence * 0.1;
-
-  const lineTotal = priceCell.value;
-  if (lineTotal <= 0) return reject('importe no positivo');
-
-  // Con dos o mas importes el formato es "... precioUnitario importe". Se
-  // valida el producto antes de fiarse: a veces la penultima columna es un
-  // descuento o un porcentaje de IVA.
-  let unitPrice: number;
-  const before = allMoney.filter((c) => c.rightX < priceCell.rightX);
-  if (before.length > 0 && quantity > 1) {
-    const candidateUnit = before[before.length - 1]!.value;
-    const consistent = Math.abs(candidateUnit * quantity - lineTotal) < 0.02;
-    unitPrice = consistent ? candidateUnit : lineTotal / quantity;
-    if (consistent) { score += 0.1; reasons.push('precio unitario cuadra'); }
-  } else {
-    unitPrice = quantity > 1 ? lineTotal / quantity : lineTotal;
-  }
 
   if (!Number.isFinite(unitPrice) || unitPrice <= 0) return reject('precio unitario invalido');
 
@@ -302,7 +379,11 @@ function* combinations<T>(items: T[], size: number): Generator<T[]> {
 
 /** Punto de entrada: lineas de OCR -> articulos del ticket. */
 export function parseReceipt(lines: OcrLine[]): ParseResult {
-  const rows = groupIntoRows(lines);
+  // Enderezar antes de agrupar no es opcional: `groupIntoRows` reparte por
+  // coordenada Y, asi que en un ticket torcido el nombre y su precio caen en
+  // filas distintas y la linea se pierde sin que salte ningun error.
+  const { lines: straight, angle } = deskew(lines);
+  const rows = groupIntoRows(straight);
   const layout = analyzeLayout(rows);
   const detectedTotal = findTotal(rows, layout.priceColumn);
 
@@ -333,5 +414,12 @@ export function parseReceipt(lines: OcrLine[]): ParseResult {
     warnings.push({ kind: 'total-mismatch', sum, detectedTotal });
   }
 
-  return { items, detectedTotal, warnings, diagnostics };
+  return {
+    items,
+    detectedTotal,
+    warnings,
+    diagnostics,
+    verdict: buildVerdict(items, detectedTotal),
+    skewDegrees: Math.round(((angle * 180) / Math.PI) * 10) / 10,
+  };
 }

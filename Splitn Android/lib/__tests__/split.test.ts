@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   createItemStates, computeTotals, togglePart, setInstanceParts, takeWholeUnit,
   splitRemainderEvenly, removeParticipantClaims, breakdownFor, freeParts, isFullyClaimed,
+  MAX_PARTS,
 } from '../split';
 import type { ParsedItem, Participant, Receipt } from '../../types';
 
@@ -112,7 +113,8 @@ describe('setInstanceParts', () => {
 
   it('acota el denominador a un rango razonable', () => {
     expect(setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, 0, 'p1').totalParts).toBe(1);
-    expect(setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, 99, 'p1').totalParts).toBe(12);
+    expect(setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, MAX_PARTS + 50, 'p1').totalParts)
+      .toBe(MAX_PARTS);
   });
 });
 
@@ -178,5 +180,24 @@ describe('breakdownFor', () => {
   it('omite los articulos que esa persona no ha tocado', () => {
     const base = receipt([item('i1', 'Pulpo', 1, 14)]);
     expect(breakdownFor(base, ana).lines).toEqual([]);
+  });
+});
+
+describe('división en un número libre de partes', () => {
+  it('acepta denominadores por encima de los atajos de la interfaz', () => {
+    // Una tortilla entre 14: raro, pero legítimo. Antes se recortaba a 12.
+    const result = setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, 14, 'p1');
+    expect(result.totalParts).toBe(14);
+  });
+
+  it('reparte bien el coste con un denominador grande', () => {
+    const base = receipt([item('i1', 'Tarta', 1, 30)]);
+    base.itemStates['i1']![0] = { instanceId: 0, totalParts: 20, claims: { p1: 3 } };
+    expect(computeTotals(base).perParticipant['p1']).toBe(4.5);
+  });
+
+  it('sigue acotando los denominadores absurdos', () => {
+    expect(setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, 5000, 'p1').totalParts).toBe(99);
+    expect(setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, -3, 'p1').totalParts).toBe(1);
   });
 });

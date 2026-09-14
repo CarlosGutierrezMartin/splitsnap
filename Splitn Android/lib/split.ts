@@ -22,6 +22,15 @@ export function createItemStates(items: ParsedItem[]): Record<string, ItemInstan
   return states;
 }
 
+/**
+ * Tope de partes en que se puede dividir una unidad.
+ *
+ * No hay razon tecnica para limitarlo a un numero pequeño: una tortilla entre
+ * 30 personas es raro pero legitimo. El tope solo evita denominadores
+ * absurdos que darian importes de cero coma nada.
+ */
+export const MAX_PARTS = 99;
+
 /** Partes ya reclamadas de una unidad. */
 export function claimedParts(instance: ItemInstance): number {
   return Object.values(instance.claims).reduce((sum, parts) => sum + parts, 0);
@@ -141,7 +150,7 @@ export function setInstanceParts(
   parts: number,
   participantId: string,
 ): ItemInstance {
-  const totalParts = Math.max(1, Math.min(12, Math.round(parts)));
+  const totalParts = Math.max(1, Math.min(MAX_PARTS, Math.round(parts)));
   return { ...instance, totalParts, claims: { [participantId]: 1 } };
 }
 

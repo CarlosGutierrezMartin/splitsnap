@@ -64,8 +64,15 @@ export interface Translations {
     lineTotal: string;
     sum: string;
     printedTotal: string;
-    mismatch: string;
     mismatchHint: string;
+    verdictBalanced: string;
+    verdictUnverified: string;
+    verdictUnverifiedHint: string;
+    verdictNothingRead: string;
+    verdictMissing: (amount: string) => string;
+    verdictExtra: (amount: string) => string;
+    verdictUncertainLines: (count: number) => string;
+    straightened: (degrees: number) => string;
     lowConfidence: string;
     continueToSplit: string;
     receiptName: string;
@@ -98,6 +105,7 @@ export interface Translations {
     takeWhole: string;
     splitUnit: string;
     splitInto: (parts: number) => string;
+    customParts: string;
     unit: (index: number) => string;
     takenBy: string;
     free: string;

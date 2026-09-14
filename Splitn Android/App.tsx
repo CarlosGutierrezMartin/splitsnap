@@ -157,6 +157,7 @@ function App() {
             items={receipt.items}
             detectedTotal={receipt.detectedTotal}
             receiptName={receipt.name}
+            skewDegrees={receipt.skewDegrees ?? 0}
             onChange={handleItemsChange}
             onRename={rename}
             onContinue={() => setScreen(AppState.SPLIT)}
