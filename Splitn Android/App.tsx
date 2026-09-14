@@ -10,6 +10,10 @@ import { AssignView } from './components/AssignView';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { RenameDialog } from './components/RenameDialog';
 import { InstallPrompt } from './components/InstallPrompt';
+import { TabBar, type Tab } from './components/TabBar';
+import { OnboardingView } from './components/OnboardingView';
+import { SettingsView } from './components/SettingsView';
+import { DiagnosticsView, type ScanDiagnostics } from './components/DiagnosticsView';
 import { Toast } from './components/Toast';
 import { useReceipt } from './hooks/useReceipt';
 import { useLanguage } from './contexts/LanguageContext';
@@ -45,6 +49,14 @@ function App() {
   // carga del motor, asi que si luego se escanea ya esta todo listo.
   const [preparing, setPreparing] = useState(false);
   const [framing, setFraming] = useState<File | null>(null);
+  const [tab, setTab] = useState<Tab>('home');
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  // Datos del ultimo escaneo, para el banco de pruebas. Solo en memoria: no
+  // tiene sentido guardar la foto en disco para esto.
+  const [lastScan, setLastScan] = useState<ScanDiagnostics | null>(null);
+  const [onboarded, setOnboarded] = useState(() => {
+    try { return localStorage.getItem('splitn:onboarded') === '1'; } catch { return true; }
+  });
 
   useEffect(() => onOcrStatus(setOcrStatus), []);
 
@@ -77,10 +89,14 @@ function App() {
         const output = await scanReceipt(file);
 
         markScanPhase('parse');
-        const { items, detectedTotal } = parseReceipt(output.lines);
+        const { items, detectedTotal, skewDegrees, diagnostics } = parseReceipt(output.lines);
+
+        // Se guarda en memoria para el banco de pruebas. No va a disco: la
+        // foto solo interesa mientras se revisa lo que se leyo de ella.
+        setLastScan({ image: file, output, rows: diagnostics, skewDegrees });
 
         markScanPhase('render');
-        createReceipt(items, { detectedTotal });
+        createReceipt(items, { detectedTotal, skewDegrees });
         setScreen(AppState.REVIEW);
       } catch (err) {
         setScanError(err instanceof Error ? err.message : String(err));
@@ -113,7 +129,20 @@ function App() {
     closeReceipt();
     setAssigning(null);
     setScreen(AppState.HOME);
+    setTab('home');
   }, [closeReceipt]);
+
+  const changeTab = useCallback((next: Tab) => {
+    setTab(next);
+    setShowDiagnostics(false);
+    if (next === 'scan') setScreen(AppState.CAPTURE);
+    else if (next === 'home') setScreen(AppState.HOME);
+  }, []);
+
+  const clearAllData = useCallback(async () => {
+    for (const stored of history) await discard(stored.id);
+    await refreshHistory();
+  }, [history, discard, refreshHistory]);
 
   const handleItemsChange = useCallback(
     (items: ParsedItem[]) => replaceItems(items),
@@ -136,6 +165,22 @@ function App() {
     }
   })();
 
+  if (!onboarded) {
+    return (
+      <OnboardingView
+        onDone={() => {
+          try { localStorage.setItem('splitn:onboarded', '1'); } catch { /* sin almacenamiento se repite */ }
+          setOnboarded(true);
+        }}
+      />
+    );
+  }
+
+  // Las pestañas solo tienen sentido en las pantallas de nivel superior: en
+  // mitad de un reparto estorban y taparian los botones de abajo.
+  const atTopLevel = screen === AppState.HOME || screen === AppState.CAPTURE;
+  const showTabs = !showDiagnostics && (tab === 'settings' || atTopLevel);
+
   return (
     <div className="min-h-screen">
       <Navbar
@@ -155,7 +200,20 @@ function App() {
           </div>
         )}
 
-        {screen === AppState.HOME && (
+        {tab === 'settings' && !showDiagnostics && (
+          <SettingsView
+            receiptCount={history.length}
+            onClearData={() => void clearAllData()}
+            onOpenDiagnostics={() => setShowDiagnostics(true)}
+            hasDiagnostics={lastScan !== null}
+          />
+        )}
+
+        {showDiagnostics && lastScan && (
+          <DiagnosticsView data={lastScan} onClose={() => setShowDiagnostics(false)} />
+        )}
+
+        {tab !== 'settings' && !showDiagnostics && screen === AppState.HOME && (
           <HomeView
             history={history}
             loading={loadingHistory}
@@ -173,7 +231,9 @@ function App() {
           />
         )}
 
-        {screen === AppState.CAPTURE && <CaptureView onSelect={handleFileSelected} />}
+        {tab !== 'settings' && !showDiagnostics && screen === AppState.CAPTURE && (
+          <CaptureView onSelect={handleFileSelected} />
+        )}
 
         {screen === AppState.FRAME && framing && (
           <FrameView
@@ -255,9 +315,11 @@ function App() {
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
 
+      {showTabs && <TabBar active={tab} onChange={changeTab} />}
+
       {/* Solo en la pantalla de inicio: ofrecer instalar en mitad de un
           reparto taparia los botones de abajo. */}
-      {screen === AppState.HOME && <InstallPrompt />}
+      {screen === AppState.HOME && tab === 'home' && !showDiagnostics && <InstallPrompt />}
     </div>
   );
 }

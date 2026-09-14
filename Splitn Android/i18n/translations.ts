@@ -17,6 +17,7 @@ export interface Translations {
     done: string;
     retry: string;
     add: string;
+    next: string;
   };
   home: {
     tagline: string;
@@ -55,6 +56,8 @@ export interface Translations {
     rotateRight: string;
     reset: string;
     corner: string;
+    detected: string;
+    useSuggestion: string;
   };
   scanning: {
     preparing: string;
@@ -138,8 +141,45 @@ export interface Translations {
     iosBody: string;
     dismiss: string;
   };
+  tabs: {
+    label: string;
+    home: string;
+    scan: string;
+    settings: string;
+  };
+  onboarding: {
+    scanTitle: string;
+    scanBody: string;
+    reviewTitle: string;
+    reviewBody: string;
+    splitTitle: string;
+    splitBody: string;
+    privacy: string;
+    start: string;
+    skip: string;
+  };
+  diagnostics: {
+    title: string;
+    boxes: string;
+    rows: string;
+    elapsed: string;
+    decisions: string;
+    showBoxes: string;
+    hideBoxes: string;
+  };
   settings: {
     theme: string;
     language: string;
+    dark: string;
+    light: string;
+    diagnostics: string;
+    diagnosticsHint: string;
+    diagnosticsEmpty: string;
+    clearData: string;
+    clearDataHint: (count: number) => string;
+    clearDataConfirm: string;
+    privacy: string;
+    terms: string;
+    offlineNote: string;
   };
 }
