@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 
 /**
  * Recorre el flujo completo con el OCR simulado.
@@ -146,6 +146,31 @@ describe('flujo de escaneo', () => {
       expect(screen.getByDisplayValue('CERVEZA')).toBeTruthy();
     }, { timeout: 5000 });
     expect(screen.getByDisplayValue('TORTILLA')).toBeTruthy();
+  });
+
+  it('deja cambiar el nombre del ticket una vez pasado el reparto', async () => {
+    // Antes solo se podia nombrar en la revision: al pasar al reparto, el
+    // nombre quedaba fijo para siempre.
+    await scanWith(TICKET);
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('CERVEZA')).toBeTruthy();
+    }, { timeout: 5000 });
+
+    fireEvent.click(screen.getByRole('button', { name: /repartir|^split$/i }));
+
+    const encabezado = await screen.findByRole('button', { name: /nombre|name/i });
+    fireEvent.click(encabezado);
+
+    const dialogo = await screen.findByRole('dialog');
+    const campo = dialogo.querySelector('input') as HTMLInputElement;
+    fireEvent.change(campo, { target: { value: 'Cena del viernes' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: /guardar|save/i }));
+
+    // El nombre nuevo sale en la cabecera del reparto y tambien en la barra
+    // superior, asi que se comprueban los dos sitios.
+    await waitFor(() => {
+      expect(screen.getAllByText('Cena del viernes').length).toBeGreaterThanOrEqual(2);
+    }, { timeout: 5000 });
   });
 
   it('muestra el error en pantalla cuando el OCR falla', async () => {

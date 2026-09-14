@@ -8,5 +8,9 @@ export default defineConfig({
     // del parser corren en node, que es mucho mas rapido, y solo los de
     // componentes levantan jsdom.
     setupFiles: ['./__tests__/setup.ts'],
+    // Los tests de componentes encadenan varias esperas; con el limite por
+    // defecto de 5 s se agota el test antes que el waitFor y el error que
+    // sale es un timeout pelado en vez de decir que no encontro.
+    testTimeout: 15_000,
   },
 });

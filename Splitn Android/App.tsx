@@ -7,6 +7,7 @@ import { ReviewView } from './components/ReviewView';
 import { SplitView } from './components/SplitView';
 import { AssignView } from './components/AssignView';
 import { ConfirmDialog } from './components/ConfirmDialog';
+import { RenameDialog } from './components/RenameDialog';
 import { InstallPrompt } from './components/InstallPrompt';
 import { Toast } from './components/Toast';
 import { useReceipt } from './hooks/useReceipt';
@@ -25,7 +26,7 @@ function App() {
   const {
     receipt, history, loadingHistory, refreshHistory,
     createReceipt, openReceipt, closeReceipt, rename, replaceItems,
-    addParticipant, removeParticipant, updateItemStates, discard,
+    addParticipant, removeParticipant, updateItemStates, discard, renameReceipt,
   } = useReceipt();
 
   const [screen, setScreen] = useState<AppState>(AppState.HOME);
@@ -34,6 +35,7 @@ function App() {
   const [assigning, setAssigning] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Receipt | null>(null);
+  const [pendingRename, setPendingRename] = useState<Receipt | null>(null);
   // Si el escaneo anterior murio a mitad (normalmente porque el navegador
   // cerro la pestaña por memoria), se avisa en vez de aparecer en el inicio
   // como si no hubiera pasado nada.
@@ -138,6 +140,7 @@ function App() {
             onScan={() => setScreen(AppState.CAPTURE)}
             onOpen={(target) => { openReceipt(target); setScreen(AppState.SPLIT); }}
             onDelete={(id) => setPendingDelete(history.find((r) => r.id === id) ?? null)}
+            onRename={setPendingRename}
           />
         )}
 
@@ -172,6 +175,7 @@ function App() {
             onAssign={(participantId) => { setAssigning(participantId); setScreen(AppState.ASSIGN); }}
             onUpdateItemStates={updateItemStates}
             onShare={handleShare}
+            onRename={() => setPendingRename(receipt)}
           />
         )}
 
@@ -201,6 +205,15 @@ function App() {
           await refreshHistory();
         }}
         onCancel={() => setPendingDelete(null)}
+      />
+
+      <RenameDialog
+        open={pendingRename !== null}
+        title={t.review.receiptName}
+        initialValue={pendingRename?.name ?? ''}
+        placeholder={t.review.receiptNamePlaceholder}
+        onSave={(name) => { if (pendingRename) void renameReceipt(pendingRename.id, name); }}
+        onCancel={() => setPendingRename(null)}
       />
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
