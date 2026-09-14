@@ -63,6 +63,10 @@ async function scanWith(lines: OcrLine[]) {
   const input = container.querySelector('input[type=file]') as HTMLInputElement;
   const file = new File([new Uint8Array([1, 2, 3])], 'ticket.png', { type: 'image/png' });
   fireEvent.change(input, { target: { files: [file] } });
+
+  // La foto pasa por la pantalla de encuadre antes de leerse. Sin recortar
+  // nada, se confirma tal cual.
+  fireEvent.click(await screen.findByRole('button', { name: /leer el ticket|read the receipt/i }));
 }
 
 beforeEach(() => {
@@ -182,6 +186,7 @@ describe('flujo de escaneo', () => {
     const input = container.querySelector('input[type=file]') as HTMLInputElement;
     const file = new File([new Uint8Array([1])], 't.png', { type: 'image/png' });
     fireEvent.change(input, { target: { files: [file] } });
+    fireEvent.click(await screen.findByRole('button', { name: /leer el ticket|read the receipt/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/no se pudo leer|couldn't read/i)).toBeTruthy();

@@ -66,6 +66,7 @@ export interface Receipt {
 export enum AppState {
   HOME = 'HOME',
   CAPTURE = 'CAPTURE',
+  FRAME = 'FRAME',
   SCANNING = 'SCANNING',
   REVIEW = 'REVIEW',
   SPLIT = 'SPLIT',

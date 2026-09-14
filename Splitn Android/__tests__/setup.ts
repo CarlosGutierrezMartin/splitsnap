@@ -18,5 +18,12 @@ if (typeof window !== 'undefined') {
     })) as typeof window.matchMedia;
   }
 
+  // jsdom no implementa las URL de objeto, que la pantalla de encuadre usa
+  // para mostrar la foto.
+  if (!URL.createObjectURL) {
+    URL.createObjectURL = () => 'blob:test';
+    URL.revokeObjectURL = () => {};
+  }
+
   afterEach(cleanup);
 }

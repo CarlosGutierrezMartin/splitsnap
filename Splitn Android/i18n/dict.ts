@@ -36,6 +36,16 @@ export const es: Translations = {
     tipFull: 'Que quepa entero, de la cabecera al total',
     privacy: 'Sin cuentas, sin servidores, sin subir nada.',
   },
+  frame: {
+    title: 'Ajusta el ticket',
+    subtitle: 'Recorta lo que sobra y enderézalo. Se lee mucho mejor.',
+    confirm: 'Leer el ticket',
+    working: 'Preparando…',
+    rotateLeft: 'Girar a la izquierda',
+    rotateRight: 'Girar a la derecha',
+    reset: 'Deshacer el ajuste',
+    corner: 'Esquina del recorte',
+  },
   scanning: {
     preparing: 'Preparando el lector…',
     downloadingModel: 'Descargando el modelo de lectura',
@@ -153,6 +163,16 @@ export const en: Translations = {
     tipLight: 'Find good light and avoid shadows',
     tipFull: 'Fit it all in, from header to total',
     privacy: 'No accounts, no servers, nothing uploaded.',
+  },
+  frame: {
+    title: 'Adjust the receipt',
+    subtitle: 'Crop what you do not need and straighten it. It reads much better.',
+    confirm: 'Read the receipt',
+    working: 'Preparing…',
+    rotateLeft: 'Rotate left',
+    rotateRight: 'Rotate right',
+    reset: 'Undo the adjustment',
+    corner: 'Crop corner',
   },
   scanning: {
     preparing: 'Preparing the reader…',
