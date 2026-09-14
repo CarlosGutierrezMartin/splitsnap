@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   createItemStates, computeTotals, togglePart, setInstanceParts, takeWholeUnit,
   splitRemainderEvenly, removeParticipantClaims, breakdownFor, freeParts, isFullyClaimed,
-  MAX_PARTS,
+  MAX_PARTS, setParticipantParts,
 } from '../split';
 import type { ParsedItem, Participant, Receipt } from '../../types';
 
@@ -199,5 +199,50 @@ describe('división en un número libre de partes', () => {
   it('sigue acotando los denominadores absurdos', () => {
     expect(setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, 5000, 'p1').totalParts).toBe(99);
     expect(setInstanceParts({ instanceId: 0, totalParts: 1, claims: {} }, -3, 'p1').totalParts).toBe(1);
+  });
+});
+
+describe('reclamar varias partes de la misma unidad', () => {
+  it('permite quedarse con más de una parte', () => {
+    // Con una tortilla partida en cinco, dos quintos tiene que ser
+    // expresable. El interruptor de antes se quedaba siempre en 1/5.
+    const result = setParticipantParts({ instanceId: 0, totalParts: 5, claims: {} }, 'p1', 2);
+    expect(result.claims).toEqual({ p1: 2 });
+  });
+
+  it('no deja reclamar más partes de las que hay', () => {
+    const result = setParticipantParts({ instanceId: 0, totalParts: 5, claims: {} }, 'p1', 9);
+    expect(result.claims).toEqual({ p1: 5 });
+  });
+
+  it('respeta las partes que ya tiene otra persona', () => {
+    const conOtro = { instanceId: 0, totalParts: 5, claims: { p2: 3 } };
+    // Quedan 2 libres, así que p1 no puede pasar de 2.
+    expect(setParticipantParts(conOtro, 'p1', 4).claims).toEqual({ p2: 3, p1: 2 });
+  });
+
+  it('permite soltar partes sin soltarlas todas', () => {
+    const result = setParticipantParts({ instanceId: 0, totalParts: 5, claims: { p1: 3 } }, 'p1', 1);
+    expect(result.claims).toEqual({ p1: 1 });
+  });
+
+  it('bajar a cero quita a la persona de la unidad', () => {
+    const result = setParticipantParts({ instanceId: 0, totalParts: 5, claims: { p1: 2 } }, 'p1', 0);
+    expect(result.claims).toEqual({});
+  });
+
+  it('el coste sale proporcional a las partes reclamadas', () => {
+    const base = receipt([item('i1', 'Tortilla', 1, 10)]);
+    base.itemStates['i1']![0] = { instanceId: 0, totalParts: 5, claims: { p1: 2, p2: 3 } };
+    const totals = computeTotals(base);
+    expect(totals.perParticipant['p1']).toBe(4);
+    expect(totals.perParticipant['p2']).toBe(6);
+    expect(totals.remaining).toBe(0);
+  });
+
+  it('devuelve una copia en lugar de mutar', () => {
+    const original = { instanceId: 0, totalParts: 5, claims: {} };
+    expect(setParticipantParts(original, 'p1', 2)).not.toBe(original);
+    expect(original.claims).toEqual({});
   });
 });

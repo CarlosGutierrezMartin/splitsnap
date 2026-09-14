@@ -7,7 +7,8 @@ import { Avatar } from './Avatar';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatEuros } from '../ocr/money';
 import {
-  claimedParts, freeParts, isFullyClaimed, setInstanceParts, takeWholeUnit, togglePart,
+  claimedParts, freeParts, isFullyClaimed, setInstanceParts, setParticipantParts,
+  takeWholeUnit, togglePart,
 } from '../lib/split';
 import type { ItemInstance, Receipt } from '../types';
 
@@ -204,22 +205,64 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                               </span>
                             </div>
 
+                            {/* Con la unidad partida se muestran las partes una a
+                                una: tocar una libre la reclama y tocar una propia
+                                la suelta. Asi se pueden coger 2 de 5, que con un
+                                unico boton de si/no era inexpresable. */}
+                            {instance.totalParts > 1 && (
+                              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                {Array.from({ length: instance.totalParts }, (_, part) => {
+                                  const isMine = part < mine;
+                                  const takenByOther = !isMine && part < mine + (claimedParts(instance) - mine);
+                                  const target = isMine ? part : part + 1;
+
+                                  return (
+                                    <button
+                                      key={part}
+                                      type="button"
+                                      disabled={takenByOther}
+                                      onClick={() =>
+                                        mutate(item.id, index, setParticipantParts(instance, participantId, target))
+                                      }
+                                      aria-label={`${target}/${instance.totalParts}`}
+                                      aria-pressed={isMine}
+                                      className={`flex h-10 min-w-10 flex-1 items-center justify-center rounded-lg text-sm font-bold transition-colors disabled:cursor-not-allowed ${
+                                        isMine
+                                          ? 'bg-primary text-white'
+                                          : takenByOther
+                                            ? 'bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                                            : 'border-2 border-dashed border-gray-300 text-gray-400 dark:border-gray-600'
+                                      }`}
+                                    >
+                                      {isMine ? <Check className="h-4 w-4" aria-hidden="true" /> : takenByOther ? '·' : '+'}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+
                             <div className="mt-2.5 flex gap-2">
-                              <button
-                                type="button"
-                                disabled={locked}
-                                onClick={() => mutate(item.id, index, togglePart(instance, participantId))}
-                                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors disabled:opacity-40 ${
-                                  mine > 0
-                                    ? 'bg-primary text-white'
-                                    : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'
-                                }`}
-                              >
-                                {mine > 0 && <Check className="h-4 w-4" aria-hidden="true" />}
-                                {instance.totalParts > 1
-                                  ? `${mine}/${instance.totalParts}`
-                                  : t.assign.takeWhole}
-                              </button>
+                              {instance.totalParts === 1 && (
+                                <button
+                                  type="button"
+                                  disabled={locked}
+                                  onClick={() => mutate(item.id, index, togglePart(instance, participantId))}
+                                  className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors disabled:opacity-40 ${
+                                    mine > 0
+                                      ? 'bg-primary text-white'
+                                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'
+                                  }`}
+                                >
+                                  {mine > 0 && <Check className="h-4 w-4" aria-hidden="true" />}
+                                  {t.assign.takeWhole}
+                                </button>
+                              )}
+
+                              {instance.totalParts > 1 && (
+                                <span className="flex min-h-10 flex-1 items-center px-1 text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                  {t.assign.yourParts(mine, instance.totalParts)}
+                                </span>
+                              )}
 
                               {instance.totalParts === 1 ? (
                                 <button
