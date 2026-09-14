@@ -53,15 +53,15 @@ export const DiagnosticsView: React.FC<DiagnosticsViewProps> = ({ data, onClose 
           [t.diagnostics.rows, String(data.rows.length)],
           [t.diagnostics.elapsed, `${Math.round(data.output.elapsedMs)} ms`],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl bg-white p-3 dark:bg-gray-900">
-            <dt className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{label}</dt>
+          <div key={label} className="rounded-control bg-surface p-3">
+            <dt className="text-[11px] font-bold uppercase tracking-wide text-muted">{label}</dt>
             <dd className="mt-0.5 font-black tabular-nums">{value}</dd>
           </div>
         ))}
       </dl>
 
       {data.skewDegrees !== 0 && (
-        <p className="mb-4 rounded-xl bg-white p-3 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300">
+        <p className="mb-4 rounded-control bg-surface p-3 text-sm text-muted">
           {t.review.straightened(Math.abs(data.skewDegrees))}
         </p>
       )}
@@ -75,7 +75,7 @@ export const DiagnosticsView: React.FC<DiagnosticsViewProps> = ({ data, onClose 
 
       {/* Las cajas se dibujan en un SVG con el mismo sistema de coordenadas
           que devolvio el detector, asi encajan sin conversiones. */}
-      <div className="relative mb-6 overflow-hidden rounded-2xl bg-gray-900">
+      <div className="relative mb-6 overflow-hidden rounded-card bg-gray-900">
         {url && <img src={url} alt={t.diagnostics.title} className="block w-full" />}
         {showBoxes && (
           <svg viewBox={`0 0 ${width} ${height}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
@@ -93,7 +93,7 @@ export const DiagnosticsView: React.FC<DiagnosticsViewProps> = ({ data, onClose 
         )}
       </div>
 
-      <h3 className="mb-2 px-1 text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+      <h3 className="mb-2 px-1 text-sm font-bold uppercase tracking-wide text-muted">
         {t.diagnostics.decisions}
       </h3>
 
@@ -101,22 +101,22 @@ export const DiagnosticsView: React.FC<DiagnosticsViewProps> = ({ data, onClose 
         {data.rows.map((row, i) => (
           <li
             key={i}
-            className={`rounded-xl border p-3 ${
+            className={`rounded-control border p-3 ${
               row.accepted
                 ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20'
-                : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900'
+                : 'border-line bg-surface'
             }`}
           >
             <div className="flex items-start gap-2">
               {row.accepted
                 ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
-                : <X className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />}
+                : <X className="mt-0.5 h-4 w-4 shrink-0 text-faint" aria-hidden="true" />}
               <span className="min-w-0 flex-1 break-words font-mono text-sm">{row.text || '—'}</span>
-              <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-xs font-bold tabular-nums dark:bg-gray-800">
+              <span className="shrink-0 rounded bg-hair px-1.5 py-0.5 text-xs font-bold tabular-nums">
                 {row.score.toFixed(2)}
               </span>
             </div>
-            <p className="mt-1.5 pl-6 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1.5 pl-6 text-xs text-muted">
               {row.reasons.join(' · ')}
             </p>
           </li>

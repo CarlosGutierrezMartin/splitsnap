@@ -40,7 +40,7 @@ export const ScanAnimation: React.FC<ScanAnimationProps> = ({ progress }) => {
       <g>
         <path
           d="M18 8 h84 a4 4 0 0 1 4 4 v126 l-11 -7 -11 7 -11 -7 -11 7 -11 -7 -11 7 -11 -7 v-119 a4 4 0 0 1 4 -4 z"
-          className="fill-gray-100 stroke-gray-300 dark:fill-gray-800 dark:stroke-gray-700"
+          className="fill-surface stroke-line"
           strokeWidth="2"
         />
         {/* Lineas de texto simuladas. */}
@@ -49,11 +49,11 @@ export const ScanAnimation: React.FC<ScanAnimationProps> = ({ progress }) => {
             key={y}
             x="30" y={y} rx="3" height="7"
             width={i % 2 === 0 ? 44 : 32}
-            className="fill-gray-300 dark:fill-gray-600"
+            className="fill-ghost"
           />
         ))}
         {[34, 52, 70, 88, 106].map((y) => (
-          <rect key={`p${y}`} x="78" y={y} rx="3" width="16" height="7" className="fill-gray-300 dark:fill-gray-600" />
+          <rect key={`p${y}`} x="78" y={y} rx="3" width="16" height="7" className="fill-ghost" />
         ))}
       </g>
 

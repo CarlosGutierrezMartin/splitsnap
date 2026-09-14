@@ -143,7 +143,7 @@ export const FrameView: React.FC<FrameViewProps> = ({ file, onConfirm, onCancel 
     <div className="mx-auto w-full max-w-xl px-4 pb-44 pt-3 animate-fade-in">
       <header className="mb-3 text-center">
         <h2 className="text-lg font-bold">{t.frame.title}</h2>
-        <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-0.5 text-sm text-muted">
           {suggested ? t.frame.detected : t.frame.subtitle}
         </p>
       </header>
@@ -162,7 +162,7 @@ export const FrameView: React.FC<FrameViewProps> = ({ file, onConfirm, onCancel 
         <div
           ref={areaRef}
           style={bounds ? { aspectRatio: `${bounds.width} / ${bounds.height}` } : undefined}
-          className="relative w-full max-w-md touch-none select-none overflow-hidden rounded-2xl bg-gray-900"
+          className="relative w-full max-w-md touch-none select-none overflow-hidden rounded-card bg-gray-900"
         >
           {url && (
             <img
@@ -251,7 +251,7 @@ export const FrameView: React.FC<FrameViewProps> = ({ file, onConfirm, onCancel 
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 p-4 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 p-4 backdrop-blur">
         <div className="mx-auto flex max-w-xl gap-3">
           <Button variant="outline" onClick={onCancel} aria-label={t.common.cancel}>
             <X className="h-5 w-5" aria-hidden="true" />

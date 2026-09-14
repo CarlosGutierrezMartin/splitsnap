@@ -92,11 +92,11 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
     <div className="mx-auto w-full max-w-xl px-4 pb-40 pt-5 animate-fade-in">
       <header className="mb-5">
         <h2 className="text-2xl font-black tracking-tight">{t.review.title}</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t.review.subtitle}</p>
+        <p className="mt-1 text-sm text-muted">{t.review.subtitle}</p>
       </header>
 
       <label className="mb-5 block">
-        <span className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        <span className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted">
           {t.review.receiptName}
         </span>
         <input
@@ -105,14 +105,14 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
           onChange={(e) => setNameDraft(e.target.value)}
           onBlur={() => onRename(nameDraft.trim() || receiptName)}
           placeholder={t.review.receiptNamePlaceholder}
-          className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base focus:border-primary focus:outline-none dark:border-gray-700 dark:bg-gray-900"
+          className="w-full rounded-control border-2 border-line bg-surface px-4 py-3 text-base focus:border-primary focus:outline-none"
         />
       </label>
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-gray-300 p-8 text-center dark:border-gray-700">
+        <div className="rounded-card border-2 border-dashed border-ghost p-8 text-center">
           <p className="font-semibold">{t.review.noItems}</p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t.review.noItemsHint}</p>
+          <p className="mt-1 text-sm text-muted">{t.review.noItemsHint}</p>
         </div>
       ) : (
         <ul className="space-y-2">
@@ -126,10 +126,10 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  className={`rounded-2xl border bg-white p-3 dark:bg-gray-900 ${
+                  className={`rounded-card border bg-surface p-3 ${
                     uncertain
                       ? 'border-amber-300 dark:border-amber-700/60'
-                      : 'border-gray-200 dark:border-gray-800'
+                      : 'border-line'
                   }`}
                 >
                   <div className="flex items-start gap-2">
@@ -139,13 +139,13 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
                       onChange={(e) => patchItem(item.id, { name: e.target.value })}
                       placeholder={t.review.newItem}
                       aria-label={t.review.name}
-                      className="min-w-0 flex-1 rounded-lg bg-transparent px-2 py-2 font-semibold focus:bg-gray-50 focus:outline-none dark:focus:bg-gray-800"
+                      className="min-w-0 flex-1 rounded-lg bg-transparent px-2 py-2 font-semibold focus:bg-hair focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => onChange(items.filter((i) => i.id !== item.id))}
                       aria-label={`${t.common.delete}: ${item.name || t.review.newItem}`}
-                      className="rounded-lg p-2 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
+                      className="rounded-lg p-2 text-ghost transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
                     </button>
@@ -153,23 +153,23 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
 
                   <div className="mt-1 flex items-end gap-2 pl-2">
                     <label className="w-16">
-                      <span className="mb-1 block text-[10px] font-bold uppercase text-gray-400">{t.review.quantity}</span>
+                      <span className="mb-1 block text-[10px] font-bold uppercase text-faint">{t.review.quantity}</span>
                       <input
                         type="number" inputMode="numeric" min={1} max={99} value={item.quantity}
                         onChange={(e) => patchItem(item.id, { quantity: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800"
+                        className="w-full rounded-lg border border-line px-2 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none"
                       />
                     </label>
                     <label className="w-24">
-                      <span className="mb-1 block text-[10px] font-bold uppercase text-gray-400">{t.review.unitPrice}</span>
+                      <span className="mb-1 block text-[10px] font-bold uppercase text-faint">{t.review.unitPrice}</span>
                       <input
                         type="number" inputMode="decimal" min={0} step={0.01} value={item.unitPrice}
                         onChange={(e) => patchItem(item.id, { unitPrice: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-right tabular-nums focus:border-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800"
+                        className="w-full rounded-lg border border-line px-2 py-1.5 text-right tabular-nums focus:border-primary focus:outline-none"
                       />
                     </label>
                     <div className="ml-auto pb-1.5 text-right">
-                      <span className="block text-[10px] font-bold uppercase text-gray-400">{t.review.lineTotal}</span>
+                      <span className="block text-[10px] font-bold uppercase text-faint">{t.review.lineTotal}</span>
                       <span className="font-bold tabular-nums">{formatEuros(item.totalPrice)}</span>
                     </div>
                   </div>
@@ -192,16 +192,16 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         {t.review.addLine}
       </Button>
 
-      <section className="mt-6 overflow-hidden rounded-2xl bg-white dark:bg-gray-900">
+      <section className="mt-6 overflow-hidden rounded-card bg-surface">
         <div className="p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{t.review.sum}</span>
+            <span className="text-sm text-muted">{t.review.sum}</span>
             <span className="text-xl font-black tabular-nums">{formatEuros(sum)}</span>
           </div>
           {verdict.detectedTotal !== null && (
             <div className="mt-1.5 flex items-center justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">{t.review.printedTotal}</span>
-              <span className="tabular-nums text-gray-500 dark:text-gray-400">
+              <span className="text-muted">{t.review.printedTotal}</span>
+              <span className="tabular-nums text-muted">
                 {formatEuros(verdict.detectedTotal)}
               </span>
             </div>
@@ -219,12 +219,12 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         )}
 
         {verdict.level === 'unverified' && (
-          <div className="bg-gray-50 p-4 dark:bg-gray-800/50">
-            <p className="flex items-start gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <div className="bg-hair p-4">
+            <p className="flex items-start gap-2 text-sm font-semibold text-muted">
               <CircleHelp className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               {t.review.verdictUnverified}
             </p>
-            <p className="mt-1 pl-6 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 pl-6 text-xs text-muted">
               {t.review.verdictUnverifiedHint}
             </p>
           </div>
@@ -247,7 +247,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         )}
 
         {verdict.uncertainItems > 0 && (
-          <p className="border-t border-gray-100 px-4 py-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+          <p className="border-t border-line px-4 py-3 text-xs text-muted">
             {t.review.verdictUncertainLines(verdict.uncertainItems)}
           </p>
         )}
@@ -255,14 +255,14 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         {/* Que el ticket saliera torcido explica muchos fallos de lectura, asi
             que conviene decirlo en vez de corregir en silencio. */}
         {Math.abs(skewDegrees) > 0 && (
-          <p className="flex items-center gap-2 border-t border-gray-100 px-4 py-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+          <p className="flex items-center gap-2 border-t border-line px-4 py-3 text-xs text-muted">
             <RotateCcw className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             {t.review.straightened(Math.abs(skewDegrees))}
           </p>
         )}
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 p-4 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 p-4 backdrop-blur">
         <div className="mx-auto max-w-xl">
           <Button fullWidth className="py-4 text-lg" onClick={onContinue} disabled={items.length === 0}>
             {t.review.continueToSplit}

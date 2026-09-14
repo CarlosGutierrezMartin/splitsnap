@@ -21,6 +21,41 @@ function renderApp() {
 
 beforeEach(() => localStorage.clear());
 
+describe('pantalla de arranque', () => {
+  beforeEach(() => {
+    // El resto de la suite parte de alguien que ya la vio; aqui interesa
+    // justo el arranque en frio.
+    sessionStorage.clear();
+    localStorage.setItem('splitn:onboarded', '1');
+  });
+
+  it('tapa la app y cuenta lo que hace mientras arranca', async () => {
+    renderApp();
+    expect(await screen.findByText(/works offline|funciona sin conexión/i)).toBeTruthy();
+    // Nada de la app debajo es alcanzable todavia.
+    expect(screen.queryByRole('main')).toBeNull();
+  });
+
+  it('se puede saltar con un toque', async () => {
+    renderApp();
+    fireEvent.click(await screen.findByText(/works offline|funciona sin conexión/i));
+    await waitFor(() =>
+      expect(within(screen.getByRole('main')).getByRole('button', { name: /^(scan|escanear)$/i })).toBeTruthy());
+  });
+
+  it('no repite en el mismo arranque del navegador', async () => {
+    const { unmount } = renderApp();
+    fireEvent.click(await screen.findByText(/works offline|funciona sin conexión/i));
+    await screen.findByRole('main');
+    unmount();
+
+    renderApp();
+    // Ya no hay presentacion: se entra directo.
+    await waitFor(() => expect(screen.getByRole('main')).toBeTruthy());
+    expect(screen.queryByText(/works offline|funciona sin conexión/i)).toBeNull();
+  });
+});
+
 describe('presentación de bienvenida', () => {
   it('se muestra la primera vez', async () => {
     renderApp();
@@ -43,19 +78,19 @@ describe('presentación de bienvenida', () => {
     expect(await screen.findByText(/split it with anyone|reparte entre quien quieras/i)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /get started|empezar/i }));
-    await waitFor(() => expect(screen.getByRole('button', { name: /scan receipt|escanear ticket/i })).toBeTruthy());
+    await waitFor(() => expect(within(screen.getByRole('main')).getByRole('button', { name: /^(scan|escanear)$/i })).toBeTruthy());
   });
 
   it('se puede saltar', async () => {
     renderApp();
     fireEvent.click(await screen.findByRole('button', { name: /^skip$|^saltar$/i }));
-    await waitFor(() => expect(screen.getByRole('button', { name: /scan receipt|escanear ticket/i })).toBeTruthy());
+    await waitFor(() => expect(within(screen.getByRole('main')).getByRole('button', { name: /^(scan|escanear)$/i })).toBeTruthy());
   });
 
   it('no vuelve a salir una vez vista', async () => {
     localStorage.setItem('splitn:onboarded', '1');
     renderApp();
-    await waitFor(() => expect(screen.getByRole('button', { name: /scan receipt|escanear ticket/i })).toBeTruthy());
+    await waitFor(() => expect(within(screen.getByRole('main')).getByRole('button', { name: /^(scan|escanear)$/i })).toBeTruthy());
     expect(screen.queryByRole('button', { name: /get started|empezar/i })).toBeNull();
   });
 });
@@ -79,7 +114,7 @@ describe('pestañas', () => {
     expect(await screen.findByText(/^theme$|^tema$/i)).toBeTruthy();
 
     fireEvent.click(within(barra).getByRole('button', { name: /home|inicio/i }));
-    await waitFor(() => expect(screen.getByRole('button', { name: /scan receipt|escanear ticket/i })).toBeTruthy());
+    await waitFor(() => expect(within(screen.getByRole('main')).getByRole('button', { name: /^(scan|escanear)$/i })).toBeTruthy());
   });
 
   it('el banco de pruebas está deshabilitado sin ningún escaneo', async () => {

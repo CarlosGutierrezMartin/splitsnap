@@ -12,6 +12,7 @@ import { RenameDialog } from './components/RenameDialog';
 import { InstallPrompt } from './components/InstallPrompt';
 import { TabBar, type Tab } from './components/TabBar';
 import { OnboardingView } from './components/OnboardingView';
+import { SplashScreen } from './components/SplashScreen';
 import { SettingsView } from './components/SettingsView';
 import { DiagnosticsView, type ScanDiagnostics } from './components/DiagnosticsView';
 import { Toast } from './components/Toast';
@@ -54,6 +55,19 @@ function App() {
   // Datos del ultimo escaneo, para el banco de pruebas. Solo en memoria: no
   // tiene sentido guardar la foto en disco para esto.
   const [lastScan, setLastScan] = useState<ScanDiagnostics | null>(null);
+  // La presentacion de arranque se ve una vez por sesion del navegador: en
+  // un arranque en frio ambienta la espera, pero al volver de la camara o
+  // tras recargar seria un peaje. Tampoco se muestra a quien pidio reducir
+  // el movimiento, porque sin animacion solo seria una pantalla parada.
+  const [splashDone, setSplashDone] = useState(() => {
+    try {
+      if (sessionStorage.getItem('splitn:splash') === '1') return true;
+      sessionStorage.setItem('splitn:splash', '1');
+    } catch { /* sin almacenamiento se ve en cada arranque */ }
+    try {
+      return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    } catch { return false; }
+  });
   const [onboarded, setOnboarded] = useState(() => {
     try { return localStorage.getItem('splitn:onboarded') === '1'; } catch { return true; }
   });
@@ -165,6 +179,8 @@ function App() {
     }
   })();
 
+  if (!splashDone) return <SplashScreen onDone={() => setSplashDone(true)} />;
+
   if (!onboarded) {
     return (
       <OnboardingView
@@ -186,6 +202,7 @@ function App() {
       <Navbar
         title={screen === AppState.HOME ? undefined : receipt?.name}
         onBack={back}
+        onEditTitle={receipt && screen !== AppState.HOME ? () => setPendingRename(receipt) : undefined}
       />
 
       <main>
@@ -218,6 +235,7 @@ function App() {
             history={history}
             loading={loadingHistory}
             onScan={() => setScreen(AppState.CAPTURE)}
+            onPickFile={handleFileSelected}
             onOpen={(target) => { openReceipt(target); setScreen(AppState.SPLIT); }}
             onDelete={(id) => setPendingDelete(history.find((r) => r.id === id) ?? null)}
             onRename={setPendingRename}
@@ -272,7 +290,6 @@ function App() {
             onAssign={(participantId) => { setAssigning(participantId); setScreen(AppState.ASSIGN); }}
             onUpdateItemStates={updateItemStates}
             onShare={handleShare}
-            onRename={() => setPendingRename(receipt)}
           />
         )}
 

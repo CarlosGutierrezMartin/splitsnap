@@ -4,11 +4,59 @@
    preferencia del sistema, para que el interruptor de la app mande. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Paleta semantica.
+ *
+ * Antes cada pantalla repetia el par "bg-white dark:bg-gray-900" a mano, y
+ * bastaba olvidar la mitad oscura en un sitio para que ese sitio se viera
+ * distinto al resto. Aqui el color se nombra por su papel (superficie,
+ * linea, texto apagado) y el modo oscuro se resuelve una sola vez, abajo.
+ * Cambiar un tono es cambiar una linea, y cambia en toda la app.
+ *
+ * Los valores claros son los mismos grises de Tailwind que ya usaban las
+ * pantallas, asi que la migracion no altera lo que ya se veia bien.
+ */
 @theme {
   --color-primary: #2a7de1;
+  /* Azul un paso mas oscuro: el texto sobre blanco dentro de la tarjeta
+     principal necesita mas contraste que el primario puro. */
+  --color-primary-deep: #1f66bd;
   --color-secondary: #10b981;
+
+  --color-canvas: #f3f4f6;
+  --color-surface: #ffffff;
+  --color-line: #e5e7eb;
+  --color-ink: #111827;
+  --color-muted: #6b7280;
+  --color-faint: #9ca3af;
+  --color-ghost: #d1d5db;
+  /* Relleno tenue: fondos de barras de progreso y separadores. */
+  --color-hair: #f3f4f6;
+
+  --radius-control: 14px;
+  --radius-card: 20px;
+  --radius-hero: 24px;
+
+  /* La sombra va tenida de azul y desplazada hacia abajo para que la tarjeta
+     principal flote sobre el lienzo en vez de estar pegada a el. */
+  --shadow-hero: 0 14px 30px -12px rgba(42, 125, 225, 0.5);
+
   --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* El unico sitio donde se decide el modo oscuro. Las utilidades de Tailwind
+   apuntan a estas variables, asi que redefinirlas aqui repinta toda la app
+   sin tocar ni una pantalla. */
+.dark {
+  --color-canvas: #030712;
+  --color-surface: #111827;
+  --color-line: #1f2937;
+  --color-ink: #f9fafb;
+  --color-muted: #9ca3af;
+  --color-faint: #6b7280;
+  --color-ghost: #4b5563;
+  --color-hair: #1f2937;
 }
 
 /* Geist auto-hospedada. Sin esto habria que pedirla a un CDN y la app
@@ -26,10 +74,12 @@
   html {
     /* Evita que iOS reescale el texto al girar el movil. */
     -webkit-text-size-adjust: 100%;
+    /* Pinta el fondo tambien detras del rebote elastico al hacer scroll. */
+    background-color: var(--color-canvas);
   }
 
   body {
-    @apply bg-gray-100 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-50;
+    @apply bg-canvas text-ink antialiased;
     font-family: var(--font-sans);
     /* Respeta el notch y la barra de gestos cuando corre como app instalada. */
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
@@ -51,7 +101,7 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-gray-300 dark:bg-gray-700;
+    @apply rounded-full bg-ghost;
   }
 }
 
@@ -66,15 +116,7 @@
 }
 
 .animate-fade-in { animation: fade-in 0.3s ease-out; }
-.animate-fade-in-up { animation: fade-in-up 0.2s ease-out; }
-
-/* Quien tenga activado "reducir movimiento" no deberia ver nada de esto. */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in,
-  .animate-fade-in-up {
-    animation: none;
-  }
-}
+.animate-fade-in-up { animation: fade-in-up 0.3s ease-out; }
 
 /* Haz de la animación de escaneo: recorre el ticket de arriba abajo. */
 @keyframes scan-sweep {
@@ -88,9 +130,49 @@
   animation: scan-sweep 1.8s ease-in-out infinite;
 }
 
+/* Presentacion de arranque. El haz recorre el ticket una sola vez mientras
+   van apareciendo las lineas, y la ultima sale en verde: es la misma
+   historia que cuenta la app, contada en dos segundos. */
+@keyframes splash-beam {
+  0%   { transform: translateY(6px); opacity: 0; }
+  8%   { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(128px); opacity: 0; }
+}
+
+@keyframes splash-line {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes splash-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes splash-mark {
+  from { opacity: 0; transform: scale(0.86); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.splash-beam { animation: splash-beam 2.1s ease-in-out 0.2s 1 both; }
+.splash-mark { animation: splash-mark 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.splash-rise { animation: splash-rise 0.5s ease-out 2.2s both; }
+.splash-line { animation: splash-line 0.35s ease-out both; }
+
+/* Quien tenga activado "reducir movimiento" no deberia ver nada de esto. */
 @media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .splash-mark,
+  .splash-rise,
+  .splash-line {
+    animation: none;
+  }
+
   /* Sin barrido, pero el relleno del ticket sigue marcando el progreso. */
-  .scan-beam {
+  .scan-beam,
+  .splash-beam {
     animation: none;
     opacity: 0;
   }

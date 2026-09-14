@@ -32,11 +32,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <motion.div
             initial={{ y: 40, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 40, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-3xl bg-white p-6 dark:bg-gray-900"
+            className="w-full max-w-sm rounded-hero bg-surface p-6"
           >
             <h3 className="text-lg font-bold">{title}</h3>
             {description && (
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{description}</p>
+              <p className="mt-2 text-sm text-muted">{description}</p>
             )}
             <div className="mt-6 flex gap-3">
               <Button variant="outline" fullWidth onClick={onCancel}>{t.common.cancel}</Button>

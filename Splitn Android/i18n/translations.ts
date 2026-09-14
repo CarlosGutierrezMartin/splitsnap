@@ -22,6 +22,7 @@ export interface Translations {
   home: {
     tagline: string;
     scanReceipt: string;
+    scanShort: string;
     recent: string;
     empty: string;
     emptyHint: string;
@@ -34,6 +35,18 @@ export interface Translations {
     preparingOffline: (percent: number) => string;
     interruptedScan: (phase: string) => string;
     interruptedScanPhoto: (megapixels: number) => string;
+    heroTitle: string;
+    saved: (count: number) => string;
+    people: (count: number) => string;
+    statusSettled: string;
+    statusUnsplit: string;
+    statusMissing: (amount: string) => string;
+  };
+  splash: {
+    photo: string;
+    read: string;
+    split: string;
+    offline: string;
   };
   capture: {
     title: string;

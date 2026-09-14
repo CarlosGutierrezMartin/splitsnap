@@ -40,11 +40,11 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onDone }) => {
             transition={{ duration: 0.2 }}
             className="flex flex-col items-center"
           >
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 text-primary">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-hero bg-primary/10 text-primary">
               <Icon className="h-9 w-9" aria-hidden="true" />
             </div>
             <h2 className="mb-3 text-2xl font-black tracking-tight">{current.title}</h2>
-            <p className="max-w-xs text-gray-500 dark:text-gray-400">{current.body}</p>
+            <p className="max-w-xs text-muted">{current.body}</p>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -55,13 +55,13 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onDone }) => {
             <span
               key={i}
               className={`h-2 rounded-full transition-all ${
-                i === step ? 'w-6 bg-primary' : 'w-2 bg-gray-300 dark:bg-gray-700'
+                i === step ? 'w-6 bg-primary' : 'w-2 bg-ghost'
               }`}
             />
           ))}
         </div>
 
-        <p className="mb-4 flex items-center justify-center gap-2 text-center text-xs text-gray-400 dark:text-gray-500">
+        <p className="mb-4 flex items-center justify-center gap-2 text-center text-xs text-faint">
           <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
           {t.onboarding.privacy}
         </p>

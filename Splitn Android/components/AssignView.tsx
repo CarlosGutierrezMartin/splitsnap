@@ -90,17 +90,17 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 pb-32 animate-fade-in">
-      <header className="sticky top-0 z-30 -mx-4 mb-4 border-b border-gray-200 bg-white/95 px-4 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
+      <header className="sticky top-0 z-30 -mx-4 mb-4 border-b border-line bg-canvas/95 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-3">
           <Avatar name={participant.name} colorSeed={participant.colorSeed} />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted">
               {t.assign.selectingFor}
             </p>
             <p className="truncate text-lg font-bold leading-tight">{participant.name}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted">
               {t.assign.yourShare}
             </p>
             <p className="text-2xl font-black tabular-nums text-primary">{formatEuros(myTotal)}</p>
@@ -122,12 +122,12 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
           return (
             <li
               key={item.id}
-              className={`overflow-hidden rounded-2xl border transition-colors ${
+              className={`overflow-hidden rounded-card border transition-colors ${
                 mineHere > 0
-                  ? 'border-primary bg-white ring-1 ring-primary/20 dark:bg-gray-900'
+                  ? 'border-primary bg-surface ring-1 ring-primary/20'
                   : exhausted
-                    ? 'border-gray-200 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900/40'
-                    : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900'
+                    ? 'border-line bg-hair opacity-60'
+                    : 'border-line bg-surface'
               }`}
             >
               <button
@@ -138,7 +138,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold">{item.name}</p>
-                  <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-0.5 text-sm text-muted">
                     {formatEuros(item.unitPrice)}
                     {item.quantity > 1 && (
                       <span className="ml-2">
@@ -153,7 +153,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                   </span>
                 )}
                 <ChevronDown
-                  className={`h-5 w-5 shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                  className={`h-5 w-5 shrink-0 text-faint transition-transform ${isOpen ? 'rotate-180' : ''}`}
                   aria-hidden="true"
                 />
               </button>
@@ -164,7 +164,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="border-t border-gray-100 dark:border-gray-800"
+                    className="border-t border-line"
                   >
                     <div className="space-y-2 p-3">
                       {instances.map((instance, index) => {
@@ -176,10 +176,10 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                         return (
                           <div
                             key={instance.instanceId}
-                            className={`rounded-xl border p-3 ${
+                            className={`rounded-control border p-3 ${
                               mine > 0
                                 ? 'border-primary/40 bg-primary/5'
-                                : 'border-gray-200 dark:border-gray-700'
+                                : 'border-line'
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
@@ -187,12 +187,12 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                                 <p className="text-sm font-semibold">
                                   {item.quantity > 1 ? t.assign.unit(index + 1) : item.name}
                                   {instance.totalParts > 1 && (
-                                    <span className="ml-1.5 text-xs font-normal text-gray-500">
+                                    <span className="ml-1.5 text-xs font-normal text-muted">
                                       · {t.assign.splitInto(instance.totalParts)}
                                     </span>
                                   )}
                                 </p>
-                                <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                                <p className="mt-0.5 truncate text-xs text-muted">
                                   {others.length > 0
                                     ? `${t.assign.takenBy} ${others.join(', ')}`
                                     : claimedParts(instance) === 0
@@ -230,8 +230,8 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                                         isMine
                                           ? 'bg-primary text-white'
                                           : takenByOther
-                                            ? 'bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
-                                            : 'border-2 border-dashed border-gray-300 text-gray-400 dark:border-gray-600'
+                                            ? 'bg-hair text-faint'
+                                            : 'border-2 border-dashed border-ghost text-faint'
                                       }`}
                                     >
                                       {isMine ? <Check className="h-4 w-4" aria-hidden="true" /> : takenByOther ? '·' : '+'}
@@ -250,7 +250,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                                   className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors disabled:opacity-40 ${
                                     mine > 0
                                       ? 'bg-primary text-white'
-                                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'
+                                      : 'bg-hair text-muted'
                                   }`}
                                 >
                                   {mine > 0 && <Check className="h-4 w-4" aria-hidden="true" />}
@@ -259,7 +259,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                               )}
 
                               {instance.totalParts > 1 && (
-                                <span className="flex min-h-10 flex-1 items-center px-1 text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                <span className="flex min-h-10 flex-1 items-center px-1 text-sm font-semibold text-muted">
                                   {t.assign.yourParts(mine, instance.totalParts)}
                                 </span>
                               )}
@@ -268,7 +268,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                                 <button
                                   type="button"
                                   onClick={() => { setCustomParts(''); setSplitting({ itemId: item.id, index }); }}
-                                  className="flex min-h-10 items-center gap-1.5 rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                  className="flex min-h-10 items-center gap-1.5 rounded-lg bg-hair px-3 text-sm font-semibold text-muted"
                                 >
                                   <Split className="h-4 w-4" aria-hidden="true" />
                                   {t.assign.splitUnit}
@@ -277,7 +277,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                                 <button
                                   type="button"
                                   onClick={() => mutate(item.id, index, takeWholeUnit(instance, participantId))}
-                                  className="flex min-h-10 items-center rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                  className="flex min-h-10 items-center rounded-lg bg-hair px-3 text-sm font-semibold text-muted"
                                 >
                                   {t.assign.takeWhole}
                                 </button>
@@ -306,11 +306,11 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
             <motion.div
               initial={{ y: 40 }} animate={{ y: 0 }} exit={{ y: 40 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-3xl bg-white p-5 dark:bg-gray-900"
+              className="w-full max-w-sm rounded-hero bg-surface p-5"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-bold">{t.assign.splitUnit}</h3>
-                <button type="button" onClick={() => setSplitting(null)} aria-label={t.common.close} className="p-1 text-gray-400">
+                <button type="button" onClick={() => setSplitting(null)} aria-label={t.common.close} className="p-1 text-faint">
                   <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
@@ -320,7 +320,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                     key={parts}
                     type="button"
                     onClick={() => applySplit(parts)}
-                    className="aspect-square rounded-xl bg-gray-100 text-lg font-bold transition-colors hover:bg-primary hover:text-white dark:bg-gray-800"
+                    className="aspect-square rounded-control bg-hair text-lg font-bold transition-colors hover:bg-primary hover:text-white"
                   >
                     {parts}
                   </button>
@@ -341,7 +341,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                   }}
                   placeholder="…"
                   aria-label={t.assign.customParts}
-                  className="aspect-square w-full rounded-xl border-2 border-dashed border-gray-300 bg-transparent text-center text-lg font-bold focus:border-primary focus:outline-none dark:border-gray-600"
+                  className="aspect-square w-full rounded-control border-2 border-dashed border-ghost bg-transparent text-center text-lg font-bold focus:border-primary focus:outline-none"
                 />
               </div>
 
@@ -360,7 +360,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
         )}
       </AnimatePresence>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 p-4 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 p-4 backdrop-blur">
         <div className="mx-auto flex max-w-xl gap-3">
           <Button variant="outline" onClick={onCancel}>{t.common.cancel}</Button>
           <Button fullWidth className="py-4 text-lg" onClick={() => onSave(itemStates)}>

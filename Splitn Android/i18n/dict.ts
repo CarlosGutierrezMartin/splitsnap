@@ -9,6 +9,7 @@ export const es: Translations = {
   home: {
     tagline: 'Escanea el ticket y reparte la cuenta.',
     scanReceipt: 'Escanear ticket',
+    scanShort: 'Escanear',
     recent: 'Tickets recientes',
     empty: 'Todavía no has escaneado nada',
     emptyHint: 'Haz una foto del ticket y reparte la cuenta en segundos.',
@@ -23,6 +24,18 @@ export const es: Translations = {
       `El escaneo anterior se cerró mientras estaba ${phase}. Suele ser falta de memoria: cierra otras pestañas y prueba con una foto más pequeña.`,
     interruptedScanPhoto: (megapixels) =>
       `La foto tenía unos ${megapixels} megapíxeles. Por encima de 8 conviene reducirla.`,
+    heroTitle: 'Haz una foto del ticket y reparte la cuenta',
+    saved: (count) => (count === 1 ? '1 guardado' : `${count} guardados`),
+    people: (count) => (count === 1 ? '1 persona' : `${count} personas`),
+    statusSettled: 'Repartido',
+    statusUnsplit: 'Sin repartir',
+    statusMissing: (amount) => `Faltan ${amount}`,
+  },
+  splash: {
+    photo: 'Foto',
+    read: 'lee el ticket',
+    split: 'reparte',
+    offline: 'Funciona sin conexión',
   },
   capture: {
     title: 'Haz una foto del ticket',
@@ -167,6 +180,7 @@ export const en: Translations = {
   home: {
     tagline: 'Scan the receipt and split the bill.',
     scanReceipt: 'Scan receipt',
+    scanShort: 'Scan',
     recent: 'Recent receipts',
     empty: "You haven't scanned anything yet",
     emptyHint: 'Snap a photo of the receipt and split it in seconds.',
@@ -181,6 +195,18 @@ export const en: Translations = {
       `The last scan closed while ${phase}. This usually means the device ran out of memory: close other tabs and try a smaller photo.`,
     interruptedScanPhoto: (megapixels) =>
       `The photo was around ${megapixels} megapixels. Above 8 it is worth shrinking it.`,
+    heroTitle: 'Snap the receipt and split the bill',
+    saved: (count) => (count === 1 ? '1 saved' : `${count} saved`),
+    people: (count) => (count === 1 ? '1 person' : `${count} people`),
+    statusSettled: 'Split',
+    statusUnsplit: 'Not split yet',
+    statusMissing: (amount) => `${amount} left`,
+  },
+  splash: {
+    photo: 'Photo',
+    read: 'reads the receipt',
+    split: 'split it',
+    offline: 'Works offline',
   },
   capture: {
     title: 'Take a photo of the receipt',

@@ -23,14 +23,14 @@ export const ScanningView: React.FC<ScanningViewProps> = ({ status, error, onRet
           <AlertTriangle className="h-8 w-8" aria-hidden="true" />
         </div>
         <h2 className="mb-2 text-xl font-bold">{t.scanning.failedTitle}</h2>
-        <p className="mb-6 text-gray-500 dark:text-gray-400">{t.scanning.failedBody}</p>
+        <p className="mb-6 text-muted">{t.scanning.failedBody}</p>
         <div className="w-full space-y-3">
           <Button fullWidth onClick={onRetry}>{t.common.retry}</Button>
           <Button fullWidth variant="outline" onClick={onEnterManually}>{t.review.addLine}</Button>
         </div>
         {/* El mensaje tecnico se muestra pero sin protagonismo: ayuda a
             diagnosticar sin asustar a quien solo quiere repartir una cena. */}
-        <p className="mt-6 break-words text-xs text-gray-400 dark:text-gray-600">{error}</p>
+        <p className="mt-6 break-words text-xs text-faint">{error}</p>
       </div>
     );
   }
@@ -65,7 +65,7 @@ export const ScanningView: React.FC<ScanningViewProps> = ({ status, error, onRet
           {percent !== null && (
             <div className="mt-2 w-full max-w-xs">
               <div
-                className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800"
+                className="h-2 overflow-hidden rounded-full bg-hair"
                 role="progressbar"
                 aria-valuenow={percent}
                 aria-valuemin={0}
@@ -76,19 +76,19 @@ export const ScanningView: React.FC<ScanningViewProps> = ({ status, error, onRet
                   style={{ width: `${percent}%` }}
                 />
               </div>
-              <p className="mt-2 text-sm font-semibold tabular-nums text-gray-600 dark:text-gray-300">
+              <p className="mt-2 text-sm font-semibold tabular-nums text-muted">
                 {percent}% · {formatMegabytes(progress!.loaded)} / {formatMegabytes(progress!.total)} MB
               </p>
             </div>
           )}
 
           {percent === null && progress && progress.loaded > 0 && (
-            <p className="mt-2 text-sm font-semibold tabular-nums text-gray-600 dark:text-gray-300">
+            <p className="mt-2 text-sm font-semibold tabular-nums text-muted">
               {formatMegabytes(progress.loaded)} MB
             </p>
           )}
 
-          <p className="mt-3 max-w-xs text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-3 max-w-xs text-sm text-muted">
             {t.scanning.downloadingHint}
           </p>
         </>

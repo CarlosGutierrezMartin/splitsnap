@@ -50,7 +50,7 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
           <motion.div
             initial={{ y: 40 }} animate={{ y: 0 }} exit={{ y: 40, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-3xl bg-white p-6 dark:bg-gray-900"
+            className="w-full max-w-sm rounded-hero bg-surface p-6"
           >
             <h3 className="mb-4 text-lg font-bold">{title}</h3>
             <input
@@ -64,7 +64,7 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
               }}
               placeholder={placeholder}
               aria-label={title}
-              className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base focus:border-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800"
+              className="w-full rounded-control border-2 border-line bg-surface px-4 py-3 text-base focus:border-primary focus:outline-none"
             />
             <div className="mt-6 flex gap-3">
               <Button variant="outline" fullWidth onClick={onCancel}>{t.common.cancel}</Button>
