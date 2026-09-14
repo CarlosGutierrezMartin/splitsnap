@@ -90,9 +90,19 @@ async function createEngine(): Promise<OcrEngine> {
   const ocr = await PaddleOCR.create({
     textDetectionModelName: DET_MODEL,
     textRecognitionModelName: REC_MODEL,
-    // El worker mantiene el hilo principal libre: sin esto la interfaz se
-    // congela varios segundos en un movil de gama media.
-    worker: true,
+    // Sin worker, a proposito y con un coste asumido.
+    //
+    // El worker del SDK viene precompilado con su propia copia de ONNX
+    // Runtime en el build JSEP, que Vite no puede reescribir. Usarlo obliga a
+    // descargar 11,3 MB de worker MAS 26,5 MB de wasm JSEP, y a mantener dos
+    // heaps de WASM vivos a la vez. En un movil de gama media eso es la via
+    // rapida a que el navegador cierre la pestaña por memoria.
+    //
+    // En el hilo principal, el alias de vite.config.ts si aplica y se carga
+    // el build WASM puro (13,3 MB). Son 24,5 MB menos y aproximadamente la
+    // mitad de memoria. El precio es que la interfaz se queda congelada
+    // durante la inferencia: mejor eso que un cierre inesperado.
+    worker: false,
     ortOptions: {
       // WASM y no 'auto': el soporte de WebGPU en moviles sigue siendo
       // irregular y para escanear un ticket una vez WASM con SIMD va sobrado.

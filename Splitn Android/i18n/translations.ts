@@ -28,6 +28,7 @@ export interface Translations {
     deleteBody: string;
     items: (count: number) => string;
     offlineReady: string;
+    interruptedScan: string;
   };
   capture: {
     title: string;
