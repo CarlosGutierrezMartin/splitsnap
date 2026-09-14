@@ -4,7 +4,7 @@ export const es: Translations = {
   common: {
     cancel: 'Cancelar', confirm: 'Confirmar', save: 'Guardar', delete: 'Eliminar',
     edit: 'Editar', close: 'Cerrar', back: 'Atrás', done: 'Listo',
-    retry: 'Reintentar', add: 'Añadir',
+    retry: 'Reintentar', add: 'Añadir', next: 'Siguiente',
   },
   home: {
     tagline: 'Escanea el ticket y reparte la cuenta.',
@@ -45,6 +45,8 @@ export const es: Translations = {
     rotateRight: 'Girar a la derecha',
     reset: 'Deshacer el ajuste',
     corner: 'Esquina del recorte',
+    detected: 'He recortado el ticket por ti. Ajústalo si hace falta.',
+    useSuggestion: 'Volver al recorte propuesto',
   },
   scanning: {
     preparing: 'Preparando el lector…',
@@ -125,14 +127,42 @@ export const es: Translations = {
     iosBody: 'Pulsa Compartir y luego «Añadir a pantalla de inicio».',
     dismiss: 'Ahora no',
   },
-  settings: { theme: 'Tema', language: 'Idioma' },
+  tabs: { label: 'Secciones', home: 'Inicio', scan: 'Escanear', settings: 'Ajustes' },
+  onboarding: {
+    scanTitle: 'Haz una foto del ticket',
+    scanBody: 'Se lee dentro de tu móvil. Recorta el papel y enderézalo para que salga mejor.',
+    reviewTitle: 'Revisa lo leído',
+    reviewBody: 'Ningún lector acierta siempre. Te digo si la suma cuadra con el total del ticket.',
+    splitTitle: 'Reparte entre quien quieras',
+    splitBody: 'Añade a la gente y cada uno elige lo suyo. Puedes partir cualquier plato en las partes que necesites.',
+    privacy: 'Sin cuentas ni servidores. La foto no sale de tu móvil.',
+    start: 'Empezar',
+    skip: 'Saltar',
+  },
+  diagnostics: {
+    title: 'Banco de pruebas',
+    boxes: 'Cajas', rows: 'Filas', elapsed: 'Tiempo',
+    decisions: 'Decisión por fila',
+    showBoxes: 'Ver cajas', hideBoxes: 'Ocultar cajas',
+  },
+  settings: {
+    theme: 'Tema', language: 'Idioma', dark: 'Oscuro', light: 'Claro',
+    diagnostics: 'Banco de pruebas',
+    diagnosticsHint: 'Ver qué leyó y por qué aceptó cada línea del último escaneo',
+    diagnosticsEmpty: 'Escanea un ticket para poder revisarlo aquí',
+    clearData: 'Borrar todos los tickets',
+    clearDataHint: (count) => (count === 1 ? 'Hay 1 ticket guardado' : `Hay ${count} tickets guardados`),
+    clearDataConfirm: 'Se borrarán de este dispositivo y no se puede deshacer.',
+    privacy: 'Privacidad', terms: 'Términos',
+    offlineNote: 'Todo se guarda en este dispositivo. Nada se envía a ningún servidor.',
+  },
 };
 
 export const en: Translations = {
   common: {
     cancel: 'Cancel', confirm: 'Confirm', save: 'Save', delete: 'Delete',
     edit: 'Edit', close: 'Close', back: 'Back', done: 'Done',
-    retry: 'Retry', add: 'Add',
+    retry: 'Retry', add: 'Add', next: 'Next',
   },
   home: {
     tagline: 'Scan the receipt and split the bill.',
@@ -173,6 +203,8 @@ export const en: Translations = {
     rotateRight: 'Rotate right',
     reset: 'Undo the adjustment',
     corner: 'Crop corner',
+    detected: 'I cropped the receipt for you. Adjust it if needed.',
+    useSuggestion: 'Back to the suggested crop',
   },
   scanning: {
     preparing: 'Preparing the reader…',
@@ -250,5 +282,33 @@ export const en: Translations = {
     iosBody: 'Tap Share, then "Add to Home Screen".',
     dismiss: 'Not now',
   },
-  settings: { theme: 'Theme', language: 'Language' },
+  tabs: { label: 'Sections', home: 'Home', scan: 'Scan', settings: 'Settings' },
+  onboarding: {
+    scanTitle: 'Take a photo of the receipt',
+    scanBody: 'It is read inside your phone. Crop the paper and straighten it for better results.',
+    reviewTitle: 'Check what was read',
+    reviewBody: 'No reader is perfect. I tell you whether the sum matches the receipt total.',
+    splitTitle: 'Split it with anyone',
+    splitBody: 'Add people and each one picks their own. Any dish can be split into as many parts as you need.',
+    privacy: 'No accounts, no servers. The photo never leaves your phone.',
+    start: 'Get started',
+    skip: 'Skip',
+  },
+  diagnostics: {
+    title: 'Test bench',
+    boxes: 'Boxes', rows: 'Rows', elapsed: 'Time',
+    decisions: 'Decision per row',
+    showBoxes: 'Show boxes', hideBoxes: 'Hide boxes',
+  },
+  settings: {
+    theme: 'Theme', language: 'Language', dark: 'Dark', light: 'Light',
+    diagnostics: 'Test bench',
+    diagnosticsHint: 'See what was read and why each line was accepted in the last scan',
+    diagnosticsEmpty: 'Scan a receipt to review it here',
+    clearData: 'Delete all receipts',
+    clearDataHint: (count) => (count === 1 ? '1 receipt stored' : `${count} receipts stored`),
+    clearDataConfirm: 'They will be removed from this device and it cannot be undone.',
+    privacy: 'Privacy', terms: 'Terms',
+    offlineNote: 'Everything is stored on this device. Nothing is sent to any server.',
+  },
 };

@@ -72,6 +72,9 @@ async function scanWith(lines: OcrLine[]) {
 beforeEach(() => {
   scanReceipt.mockReset();
   localStorage.clear();
+  // La presentacion sale una sola vez; estos tests van del flujo de escaneo,
+  // asi que se parte de una app ya conocida.
+  localStorage.setItem('splitn:onboarded', '1');
 });
 
 describe('flujo de escaneo', () => {
