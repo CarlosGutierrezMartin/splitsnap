@@ -46,6 +46,16 @@ export interface Translations {
     tipFull: string;
     privacy: string;
   };
+  frame: {
+    title: string;
+    subtitle: string;
+    confirm: string;
+    working: string;
+    rotateLeft: string;
+    rotateRight: string;
+    reset: string;
+    corner: string;
+  };
   scanning: {
     preparing: string;
     downloadingModel: string;

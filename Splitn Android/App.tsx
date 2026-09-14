@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { HomeView } from './components/HomeView';
 import { CaptureView } from './components/CaptureView';
+import { FrameView } from './components/FrameView';
 import { ScanningView } from './components/ScanningView';
 import { ReviewView } from './components/ReviewView';
 import { SplitView } from './components/SplitView';
@@ -43,6 +44,7 @@ function App() {
   // La preparacion para uso sin conexion es voluntaria: reutiliza la misma
   // carga del motor, asi que si luego se escanea ya esta todo listo.
   const [preparing, setPreparing] = useState(false);
+  const [framing, setFraming] = useState<File | null>(null);
 
   useEffect(() => onOcrStatus(setOcrStatus), []);
 
@@ -55,8 +57,18 @@ function App() {
     if (screen === AppState.CAPTURE) void loadOcrEngine().catch(() => undefined);
   }, [screen]);
 
+  /**
+   * La foto pasa primero por el encuadre. Recortar al ticket multiplica la
+   * resolucion efectiva del detector y quita el fondo, que es de donde salen
+   * la mayoria de las lineas basura.
+   */
+  const handleFileSelected = useCallback((file: File) => {
+    setFraming(file);
+    setScreen(AppState.FRAME);
+  }, []);
+
   const handleScan = useCallback(
-    async (file: File) => {
+    async (file: Blob) => {
       setScreen(AppState.SCANNING);
       setScanError(null);
 
@@ -112,6 +124,8 @@ function App() {
     switch (screen) {
       case AppState.CAPTURE:
         return () => setScreen(AppState.HOME);
+      case AppState.FRAME:
+        return () => { setFraming(null); setScreen(AppState.CAPTURE); };
       case AppState.REVIEW:
       case AppState.SPLIT:
         return goHome;
@@ -159,7 +173,15 @@ function App() {
           />
         )}
 
-        {screen === AppState.CAPTURE && <CaptureView onSelect={handleScan} />}
+        {screen === AppState.CAPTURE && <CaptureView onSelect={handleFileSelected} />}
+
+        {screen === AppState.FRAME && framing && (
+          <FrameView
+            file={framing}
+            onConfirm={(framed) => { setFraming(null); void handleScan(framed); }}
+            onCancel={() => { setFraming(null); setScreen(AppState.CAPTURE); }}
+          />
+        )}
 
         {screen === AppState.SCANNING && (
           <ScanningView
