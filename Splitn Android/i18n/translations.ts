@@ -104,6 +104,7 @@ export interface Translations {
     takeWhole: string;
     splitUnit: string;
     splitInto: (parts: number) => string;
+    customParts: string;
     unit: (index: number) => string;
     takenBy: string;
     free: string;

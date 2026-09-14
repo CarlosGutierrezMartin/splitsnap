@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronDown, Split, X } from 'lucide-react';
+import { MAX_PARTS } from '../lib/split';
 import { Button } from './Button';
 import { Avatar } from './Avatar';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,8 +18,12 @@ interface AssignViewProps {
   onCancel: () => void;
 }
 
-/** Denominadores ofrecidos al partir una unidad. Mas de 6 no se usa nunca. */
-const SPLIT_OPTIONS = [2, 3, 4, 5, 6];
+/**
+ * Atajos para partir una unidad. Cubren la mayoria de los casos; para el
+ * resto hay un campo libre, porque una tortilla entre 14 es rara pero
+ * legitima y no tiene por que ser imposible de expresar.
+ */
+const SPLIT_OPTIONS = [2, 3, 4, 5];
 
 /**
  * Pantalla donde una persona elige qué ha tomado.
@@ -35,6 +40,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
   );
   const [expanded, setExpanded] = useState<string | null>(null);
   const [splitting, setSplitting] = useState<{ itemId: string; index: number } | null>(null);
+  const [customParts, setCustomParts] = useState('');
 
   const myTotal = useMemo(() => {
     let total = 0;
@@ -60,6 +66,21 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
   };
 
   /** Nombre de quien ocupa una parte, para que se vea con quién se comparte. */
+  /** Un denominador escrito a mano solo vale si es un entero en rango. */
+  const isValidParts = (raw: string): boolean => {
+    const value = Number(raw);
+    return Number.isInteger(value) && value >= 2 && value <= MAX_PARTS;
+  };
+
+  const applySplit = (parts: number): void => {
+    if (!splitting || !Number.isFinite(parts) || parts < 2) return;
+    const instance = itemStates[splitting.itemId]?.[splitting.index];
+    if (instance) {
+      mutate(splitting.itemId, splitting.index, setInstanceParts(instance, parts, participantId));
+    }
+    setSplitting(null);
+  };
+
   const otherHolders = (instance: ItemInstance): string[] =>
     Object.keys(instance.claims)
       .filter((id) => id !== participantId)
@@ -203,7 +224,7 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                               {instance.totalParts === 1 ? (
                                 <button
                                   type="button"
-                                  onClick={() => setSplitting({ itemId: item.id, index })}
+                                  onClick={() => { setCustomParts(''); setSplitting({ itemId: item.id, index }); }}
                                   className="flex min-h-10 items-center gap-1.5 rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
                                 >
                                   <Split className="h-4 w-4" aria-hidden="true" />
@@ -255,19 +276,42 @@ export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, 
                   <button
                     key={parts}
                     type="button"
-                    onClick={() => {
-                      const instance = itemStates[splitting.itemId]?.[splitting.index];
-                      if (instance) {
-                        mutate(splitting.itemId, splitting.index, setInstanceParts(instance, parts, participantId));
-                      }
-                      setSplitting(null);
-                    }}
+                    onClick={() => applySplit(parts)}
                     className="aspect-square rounded-xl bg-gray-100 text-lg font-bold transition-colors hover:bg-primary hover:text-white dark:bg-gray-800"
                   >
                     {parts}
                   </button>
                 ))}
+
+                {/* Quinta casilla: en vez de un numero fijo mas, el campo
+                    libre. Asi el atajo cubre lo habitual sin cerrar la puerta
+                    a repartos poco corrientes. */}
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={2}
+                  max={MAX_PARTS}
+                  value={customParts}
+                  onChange={(e) => setCustomParts(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') applySplit(Number(customParts));
+                  }}
+                  placeholder="…"
+                  aria-label={t.assign.customParts}
+                  className="aspect-square w-full rounded-xl border-2 border-dashed border-gray-300 bg-transparent text-center text-lg font-bold focus:border-primary focus:outline-none dark:border-gray-600"
+                />
               </div>
+
+              <Button
+                fullWidth
+                className="mt-3"
+                disabled={!isValidParts(customParts)}
+                onClick={() => applySplit(Number(customParts))}
+              >
+                {isValidParts(customParts)
+                  ? t.assign.splitInto(Number(customParts))
+                  : t.assign.customParts}
+              </Button>
             </motion.div>
           </motion.div>
         )}
