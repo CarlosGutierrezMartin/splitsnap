@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronRight, Pencil, Receipt, Trash2, WifiOff } from 'lucide-react';
+import { Camera, ChevronRight, CloudDownload, Pencil, Receipt, Trash2, WifiOff, Check } from 'lucide-react';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatEuros } from '../ocr/money';
@@ -13,6 +13,10 @@ interface HomeViewProps {
   onOpen: (receipt: ReceiptModel) => void;
   onDelete: (receiptId: string) => void;
   onRename: (receipt: ReceiptModel) => void;
+  /** Estado de la preparacion para uso sin conexion. */
+  offline: 'idle' | 'downloading' | 'ready';
+  offlineProgress: number | null;
+  onPrepareOffline: () => void;
 }
 
 function formatWhen(timestamp: number, locale: string): string {
@@ -27,6 +31,7 @@ function formatWhen(timestamp: number, locale: string): string {
 
 export const HomeView: React.FC<HomeViewProps> = ({
   history, loading, onScan, onOpen, onDelete, onRename,
+  offline, offlineProgress, onPrepareOffline,
 }) => {
   const { t, language } = useLanguage();
 
@@ -42,10 +47,36 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {t.home.scanReceipt}
       </Button>
 
-      <p className="mb-8 flex items-center justify-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
-        <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
-        {t.home.offlineReady}
-      </p>
+      {/* La descarga del lector son 44 MB. En vez de gastarlos sin permiso al
+          abrir la app, se ofrece adelantarlos cuando a la persona le venga
+          bien; quien no lo toque los descarga igual al primer escaneo. */}
+      {offline === 'ready' ? (
+        <p className="mb-8 flex items-center justify-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+          {t.home.offlineReady}
+        </p>
+      ) : (
+        <button
+          type="button"
+          onClick={onPrepareOffline}
+          disabled={offline === 'downloading'}
+          className="mb-8 flex w-full items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-left transition-colors hover:border-primary/50 disabled:cursor-progress dark:border-gray-800 dark:bg-gray-900"
+        >
+          {offline === 'downloading'
+            ? <CloudDownload className="h-5 w-5 shrink-0 animate-pulse text-primary" aria-hidden="true" />
+            : <WifiOff className="h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />}
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold">
+              {offline === 'downloading' && offlineProgress !== null
+                ? t.home.preparingOffline(Math.round(offlineProgress * 100))
+                : t.home.prepareOffline}
+            </span>
+            <span className="block text-xs text-gray-500 dark:text-gray-400">
+              {t.home.prepareOfflineHint}
+            </span>
+          </span>
+        </button>
+      )}
 
       <h2 className="mb-3 px-1 text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
         {t.home.recent}

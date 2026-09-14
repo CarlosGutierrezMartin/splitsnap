@@ -1,5 +1,7 @@
 import React from 'react';
-import { Loader2, Download, ScanLine, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import { ScanAnimation } from './ScanAnimation';
+import { formatMegabytes } from '../ocr/modelLoader';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import type { OcrStatus } from '../ocr/types';
@@ -34,6 +36,13 @@ export const ScanningView: React.FC<ScanningViewProps> = ({ status, error, onRet
   }
 
   const downloading = status.phase === 'downloading';
+  const { progress } = status;
+
+  // Solo se enseña porcentaje cuando el servidor dijo el tamaño total. Con
+  // total desconocido se enseñan los MB que llevan, que es informacion real,
+  // en vez de una barra inventada.
+  const ratio = progress && progress.total > 0 ? progress.loaded / progress.total : null;
+  const percent = ratio !== null ? Math.round(ratio * 100) : null;
 
   return (
     <div
@@ -41,19 +50,48 @@ export const ScanningView: React.FC<ScanningViewProps> = ({ status, error, onRet
       role="status"
       aria-live="polite"
     >
-      <div className="relative mb-6">
-        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 text-primary">
-          {downloading ? <Download className="h-9 w-9" aria-hidden="true" /> : <ScanLine className="h-9 w-9" aria-hidden="true" />}
-        </div>
-        <Loader2 className="absolute -bottom-1 -right-1 h-7 w-7 animate-spin text-primary" aria-hidden="true" />
-      </div>
+      <ScanAnimation progress={downloading ? ratio : null} />
 
-      <h2 className="mb-2 text-xl font-bold">
-        {downloading ? t.scanning.downloadingModel : status.phase === 'ready' ? t.scanning.reading : t.scanning.preparing}
+      <h2 className="mb-2 mt-6 text-xl font-bold">
+        {downloading
+          ? t.scanning.downloadingModel
+          : status.phase === 'initializing'
+            ? t.scanning.preparing
+            : t.scanning.reading}
       </h2>
 
       {downloading && (
-        <p className="max-w-xs text-sm text-gray-500 dark:text-gray-400">{t.scanning.downloadingHint}</p>
+        <>
+          {percent !== null && (
+            <div className="mt-2 w-full max-w-xs">
+              <div
+                className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800"
+                role="progressbar"
+                aria-valuenow={percent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <div
+                  className="h-full rounded-full bg-primary transition-[width] duration-300"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <p className="mt-2 text-sm font-semibold tabular-nums text-gray-600 dark:text-gray-300">
+                {percent}% · {formatMegabytes(progress!.loaded)} / {formatMegabytes(progress!.total)} MB
+              </p>
+            </div>
+          )}
+
+          {percent === null && progress && progress.loaded > 0 && (
+            <p className="mt-2 text-sm font-semibold tabular-nums text-gray-600 dark:text-gray-300">
+              {formatMegabytes(progress.loaded)} MB
+            </p>
+          )}
+
+          <p className="mt-3 max-w-xs text-sm text-gray-500 dark:text-gray-400">
+            {t.scanning.downloadingHint}
+          </p>
+        </>
       )}
     </div>
   );

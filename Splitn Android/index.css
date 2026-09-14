@@ -75,3 +75,23 @@
     animation: none;
   }
 }
+
+/* Haz de la animación de escaneo: recorre el ticket de arriba abajo. */
+@keyframes scan-sweep {
+  0%   { transform: translateY(8px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(140px); opacity: 0; }
+}
+
+.scan-beam {
+  animation: scan-sweep 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Sin barrido, pero el relleno del ticket sigue marcando el progreso. */
+  .scan-beam {
+    animation: none;
+    opacity: 0;
+  }
+}
