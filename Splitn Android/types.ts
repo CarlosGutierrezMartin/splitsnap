@@ -6,10 +6,18 @@ export interface ParsedItem {
   unitPrice: number;
   totalPrice: number;
   /**
-   * Confianza del OCR, 0..1. Ausente cuando la linea la ha escrito la
-   * persona a mano, que es justamente el caso de confianza total.
+   * Confianza del OCR al leer el texto, 0..1. Ausente cuando la linea la ha
+   * escrito la persona a mano, que es justamente el caso de confianza total.
    */
   confidence?: number;
+  /**
+   * Certeza del parser de que esta fila sea un articulo, 0..1.
+   *
+   * Es distinto de `confidence`: el OCR puede haber leido perfectamente algo
+   * que no es un producto. Se guardan por separado para que la revision
+   * pueda marcar ambos casos.
+   */
+  score?: number;
 }
 
 /** Alguien entre quien se reparte la cuenta. Vive solo en este dispositivo. */

@@ -15,8 +15,22 @@ interface ReviewViewProps {
   onContinue: () => void;
 }
 
-/** Por debajo de esto la lectura se marca para que la persona la mire. */
+/** Por debajo de esto la lectura del OCR se marca para que la persona la mire. */
 const LOW_CONFIDENCE = 0.75;
+
+/** Por debajo de esto el parser no las tiene todas consigo con esa fila. */
+const LOW_SCORE = 0.7;
+
+/**
+ * Una linea es dudosa por dos motivos independientes: que el OCR leyera mal
+ * el texto, o que el parser no este seguro de que sea un articulo. Se marcan
+ * las dos, porque a la persona que revisa le da igual cual de las dos falla.
+ */
+function isUncertain(item: ParsedItem): boolean {
+  if (item.confidence !== undefined && item.confidence < LOW_CONFIDENCE) return true;
+  if (item.score !== undefined && item.score < LOW_SCORE) return true;
+  return false;
+}
 
 /**
  * Revision y correccion de lo que ha leido el OCR.
@@ -51,8 +65,10 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
           quantity,
           unitPrice,
           totalPrice: Math.round(unitPrice * quantity * 100) / 100,
-          // Editar a mano equivale a confirmar: deja de estar en duda.
-          confidence: patch.confidence ?? undefined,
+          // Editar a mano equivale a confirmar: deja de estar en duda, tanto
+          // por la lectura del OCR como por la certeza del parser.
+          confidence: undefined,
+          score: undefined,
         };
       }),
     );
@@ -101,7 +117,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         <ul className="space-y-2">
           <AnimatePresence initial={false}>
             {items.map((item) => {
-              const uncertain = item.confidence !== undefined && item.confidence < LOW_CONFIDENCE;
+              const uncertain = isUncertain(item);
               return (
                 <motion.li
                   key={item.id}
