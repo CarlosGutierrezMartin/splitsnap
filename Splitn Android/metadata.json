@@ -1,0 +1,7 @@
+{
+  "name": "Splitn",
+  "description": "A smart bill-splitting application that uses Gemini AI to parse receipt images and allows users to claim items interactively like a POS system.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

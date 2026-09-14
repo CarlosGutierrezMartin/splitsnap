@@ -1,0 +1,123 @@
+import { Translations } from './translations';
+
+export const en: Translations = {
+    common: {
+        loading: "Loading...",
+        cancel: "Cancel",
+        confirm: "Confirm",
+        save: "Save Changes",
+        delete: "Delete",
+        edit: "Edit",
+        close: "Close",
+        back: "Back",
+        next: "Next",
+    },
+    navbar: {
+        home: "Home",
+        signedInAs: "Signed in as",
+        guest: "Guest User",
+        editProfile: "Edit Profile",
+        signOut: "Sign Out",
+        darkMode: "Dark Mode",
+        language: "Language",
+        profile: "Profile",
+    },
+    home: {
+        welcome: "Welcome to Splitn",
+        yourSessions: "Your Sessions",
+        createNew: "New Session",
+        joinSession: "Join Session",
+        noSessions: "No active sessions found.",
+        startNew: "Start a new one!",
+        join: "Join",
+        deleteSession: "Delete Session",
+        deletePrompt: "Are you sure you want to delete this session?"
+    },
+    dashboard: {
+        scanReceipt: "Scan Receipt",
+        uploadImage: "Upload Image",
+        processing: "Processing Receipt...",
+        invite: "Invite",
+        members: "Members",
+        items: "Items",
+        subtotal: "Subtotal",
+        tax: "Tax",
+        tip: "Tip",
+        total: "Total",
+        remaining: "Remaining",
+        myShare: "My Share",
+    },
+    splitter: {
+        selectItems: "Select Items",
+        split: "Split",
+        payFull: "Pay Full",
+        everyone: "Everyone",
+        custom: "Custom",
+    },
+    auth: {
+        signIn: "Sign In",
+        signInGoogle: "Sign in with Google",
+        continueGuest: "Continue as Guest",
+    }
+};
+
+export const es: Translations = {
+    common: {
+        loading: "Cargando...",
+        cancel: "Cancelar",
+        confirm: "Confirmar",
+        save: "Guardar Cambios",
+        delete: "Eliminar",
+        edit: "Editar",
+        close: "Cerrar",
+        back: "Atrás",
+        next: "Siguiente",
+    },
+    navbar: {
+        home: "Inicio",
+        signedInAs: "Sesión iniciada como",
+        guest: "Usuario Invitado",
+        editProfile: "Editar Perfil",
+        signOut: "Cerrar Sesión",
+        darkMode: "Modo Oscuro",
+        language: "Idioma",
+        profile: "Perfil",
+    },
+    home: {
+        welcome: "Bienvenido a Splitn",
+        yourSessions: "Tus Sesiones",
+        createNew: "Nueva Sesión",
+        joinSession: "Unirse a Sesión",
+        noSessions: "No se encontraron sesiones activas.",
+        startNew: "¡Empieza una nueva!",
+        join: "Unirse",
+        deleteSession: "Eliminar Sesión",
+        deletePrompt: "¿Estás seguro de que quieres eliminar esta sesión?"
+    },
+    dashboard: {
+        scanReceipt: "Escanear Recibo",
+        uploadImage: "Subir Imagen",
+        processing: "Procesando Recibo...",
+        invite: "Invitar",
+        members: "Miembros",
+        items: "Artículos",
+        subtotal: "Subtotal",
+        tax: "Impuestos",
+        tip: "Propina",
+        total: "Total",
+        remaining: "Restante",
+        myShare: "Mi Parte",
+    },
+    splitter: {
+        selectItems: "Seleccionar Artículos",
+        split: "Dividir",
+        payFull: "Pagar Todo",
+        everyone: "Todos",
+        custom: "Personalizado",
+    },
+    auth: {
+        signIn: "Iniciar Sesión",
+        signInGoogle: "Entrar con Google",
+        continueGuest: "Continuar como Invitado",
+    }
+};

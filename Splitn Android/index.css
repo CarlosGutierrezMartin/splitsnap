@@ -1,0 +1,61 @@
+/* Import Geist font from fonts.cdnfonts.com */
+@import url('https://fonts.cdnfonts.com/css/geist');
+@import url('https://fonts.cdnfonts.com/css/geist-mono');
+
+/* Apply Geist Sans as the default font */
+body {
+  font-family: 'Geist', sans-serif;
+  background-color: #F3F4F6;
+}
+
+/* For code/monospace elements */
+code,
+pre,
+.font-mono {
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Custom scrollbar for clean look */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.2s ease-out;
+}
