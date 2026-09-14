@@ -5,9 +5,19 @@
  * Se auto-hospeda en lugar de usar el CDN por lo mismo que los modelos: sin
  * esto el service worker no puede cachearlo y la app no arranca sin conexion.
  *
- * Solo se copia la variante SIMD+threaded. Las otras (jsep para WebGPU,
- * asyncify, jspi) suman mas de 60 MB y no las necesitamos: para escanear un
- * ticket una vez, WASM va sobrado y funciona en todos los navegadores.
+ * Se copian DOS variantes, y las dos hacen falta:
+ *
+ *  - `ort-wasm-simd-threaded.*`  el build WASM puro.
+ *  - `ort-wasm-simd-threaded.jsep.*`  el build JSEP.
+ *
+ * ONNX Runtime resuelve el nombre del fichero por su propio build, no por el
+ * `backend` que pidamos: la distribucion por defecto es la JSEP y la busca
+ * aunque se fuerce `backend: 'wasm'`. Copiar solo la primera rompia el motor
+ * con "no available backend found ... Failed to fetch dynamically imported
+ * module: ort-wasm-simd-threaded.jsep.mjs".
+ *
+ * Las variantes asyncify y jspi si se quedan fuera: suman mas de 40 MB y
+ * ninguna ruta del SDK las pide.
  */
 import { mkdir, copyFile, access } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
@@ -17,7 +27,12 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'node_modules', 'onnxruntime-web', 'dist');
 const DEST = join(ROOT, 'public', 'ort');
 
-const FILES = ['ort-wasm-simd-threaded.wasm', 'ort-wasm-simd-threaded.mjs'];
+const FILES = [
+  'ort-wasm-simd-threaded.wasm',
+  'ort-wasm-simd-threaded.mjs',
+  'ort-wasm-simd-threaded.jsep.wasm',
+  'ort-wasm-simd-threaded.jsep.mjs',
+];
 
 async function main() {
   try {

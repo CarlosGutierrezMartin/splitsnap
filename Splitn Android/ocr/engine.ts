@@ -94,9 +94,11 @@ async function createEngine(): Promise<OcrEngine> {
     // congela varios segundos en un movil de gama media.
     worker: true,
     ortOptions: {
-      // WASM y no 'auto': WebGPU exigiria servir tambien la variante jsep
-      // (27 MB extra) y su soporte en moviles sigue siendo irregular. Para
-      // escanear un ticket una sola vez, WASM con SIMD va sobrado.
+      // WASM y no 'auto': el soporte de WebGPU en moviles sigue siendo
+      // irregular y para escanear un ticket una vez WASM con SIMD va sobrado.
+      // Ojo: esto NO decide que binario descarga ORT. ORT resuelve el nombre
+      // del fichero por su propio build (el por defecto es JSEP), asi que
+      // `scripts/copy-ort.mjs` tiene que servir tambien esa variante.
       backend: 'wasm',
       // Servimos el wasm de ORT desde nuestro propio origen para que el
       // service worker pueda cachearlo y la app arranque sin conexion.

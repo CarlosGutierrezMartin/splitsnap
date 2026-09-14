@@ -14,10 +14,12 @@ const base = process.env.BASE_PATH ?? '/';
  * Descarta los binarios de ONNX Runtime que Rollup emite por los `new URL()`
  * internos del SDK.
  *
- * La variante jsep sola pesa 27,8 MB y no se usa: el motor arranca con
- * `backend: 'wasm'` y `wasmPaths` apuntando a /ort/, donde servimos la unica
- * variante que necesitamos. Sin esto, cada despliegue sube decenas de MB de
- * binarios muertos.
+ * Son duplicados: el motor arranca con `wasmPaths` apuntando a /ort/, que
+ * `scripts/copy-ort.mjs` rellena desde node_modules. Dejar ademas la copia
+ * que emite Rollup en /assets/ duplicaria ~42 MB por despliegue sin que nadie
+ * la pida.
+ *
+ * Se borra la copia de /assets/, NUNCA la de /ort/: esa es la que carga ORT.
  */
 function dropUnusedOnnxBinaries() {
   return {
