@@ -28,6 +28,9 @@ export interface Translations {
     deleteBody: string;
     items: (count: number) => string;
     offlineReady: string;
+    prepareOffline: string;
+    prepareOfflineHint: string;
+    preparingOffline: (percent: number) => string;
     interruptedScan: (phase: string) => string;
     interruptedScanPhoto: (megapixels: number) => string;
   };

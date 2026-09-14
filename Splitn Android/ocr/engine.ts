@@ -2,6 +2,7 @@ import type * as PaddleOcrModule from '@paddleocr/paddleocr-js';
 import type { OcrLine, OcrOutput, OcrStatus } from './types';
 import { preprocessReceipt } from './preprocess';
 import { markScanImageSize, markScanPhase } from '../lib/crashReport';
+import { prefetchWithProgress } from './modelLoader';
 
 /**
  * Motor de OCR: PP-OCRv5 mobile (Apache-2.0) sobre ONNX Runtime Web.
@@ -71,6 +72,21 @@ async function resolveModelSource(): Promise<ModelSource> {
 async function createEngine(): Promise<OcrEngine> {
   const source = await resolveModelSource();
   setStatus({ phase: 'downloading', source });
+
+  // Con modelos auto-hospedados podemos medir la descarga y enseñar un
+  // progreso de verdad. Con los del CDN oficial no, porque el SDK los pide
+  // por su cuenta y no informa de nada.
+  if (source === 'local') {
+    await prefetchWithProgress(
+      [
+        assetUrl(`models/${DET_MODEL}_onnx_infer.tar`),
+        assetUrl(`models/${REC_MODEL}_onnx_infer.tar`),
+      ],
+      (progress) => setStatus({ phase: 'downloading', source, progress }),
+    );
+  }
+
+  setStatus({ phase: 'initializing', source });
 
   // Import dinamico: el SDK con OpenCV y ONNX Runtime pesa mas de 10 MB. Si
   // se importase arriba entraria en el bundle inicial y abrir la app para

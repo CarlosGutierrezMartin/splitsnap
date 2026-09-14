@@ -31,4 +31,12 @@ export interface OcrStatus {
   /** De donde salen los modelos: auto-hospedados o CDN oficial. */
   source: 'local' | 'remote' | 'unknown';
   message?: string;
+  /**
+   * Avance de la descarga, en bytes.
+   *
+   * Ausente cuando no se puede medir: los modelos del CDN oficial los pide el
+   * propio SDK, que no informa de nada. En ese caso la vista enseña una
+   * espera indeterminada en vez de un porcentaje inventado.
+   */
+  progress?: { loaded: number; total: number };
 }

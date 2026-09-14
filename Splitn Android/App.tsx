@@ -40,6 +40,9 @@ function App() {
   // cerro la pestaña por memoria), se avisa en vez de aparecer en el inicio
   // como si no hubiera pasado nada.
   const [crashed] = useState(consumeInterruptedScan);
+  // La preparacion para uso sin conexion es voluntaria: reutiliza la misma
+  // carga del motor, asi que si luego se escanea ya esta todo listo.
+  const [preparing, setPreparing] = useState(false);
 
   useEffect(() => onOcrStatus(setOcrStatus), []);
 
@@ -81,6 +84,11 @@ function App() {
     createReceipt([], { detectedTotal: null });
     setScreen(AppState.REVIEW);
   }, [createReceipt]);
+
+  const prepareOffline = useCallback(() => {
+    setPreparing(true);
+    void loadOcrEngine().catch(() => undefined).finally(() => setPreparing(false));
+  }, []);
 
   const handleShare = useCallback(async () => {
     if (!receipt) return;
@@ -141,6 +149,13 @@ function App() {
             onOpen={(target) => { openReceipt(target); setScreen(AppState.SPLIT); }}
             onDelete={(id) => setPendingDelete(history.find((r) => r.id === id) ?? null)}
             onRename={setPendingRename}
+            offline={ocrStatus.phase === 'ready' ? 'ready' : preparing ? 'downloading' : 'idle'}
+            offlineProgress={
+              ocrStatus.progress && ocrStatus.progress.total > 0
+                ? ocrStatus.progress.loaded / ocrStatus.progress.total
+                : null
+            }
+            onPrepareOffline={prepareOffline}
           />
         )}
 

@@ -15,7 +15,10 @@ export const es: Translations = {
     deleteTitle: '¿Eliminar este ticket?',
     deleteBody: 'Se borrará de este dispositivo y no se puede deshacer.',
     items: (count) => (count === 1 ? '1 artículo' : `${count} artículos`),
-    offlineReady: 'Funciona sin conexión',
+    offlineReady: 'Listo para usar sin conexión',
+    prepareOffline: 'Preparar para usar sin conexión',
+    prepareOfflineHint: 'Descarga el lector (44 MB). Mejor con wifi. Si no, se descarga al escanear.',
+    preparingOffline: (percent) => `Descargando el lector… ${percent}%`,
     interruptedScan: (phase) =>
       `El escaneo anterior se cerró mientras estaba ${phase}. Suele ser falta de memoria: cierra otras pestañas y prueba con una foto más pequeña.`,
     interruptedScanPhoto: (megapixels) =>
@@ -130,7 +133,10 @@ export const en: Translations = {
     deleteTitle: 'Delete this receipt?',
     deleteBody: "It will be removed from this device and can't be undone.",
     items: (count) => (count === 1 ? '1 item' : `${count} items`),
-    offlineReady: 'Works offline',
+    offlineReady: 'Ready to use offline',
+    prepareOffline: 'Get ready for offline use',
+    prepareOfflineHint: 'Downloads the reader (44 MB). Best on wifi. Otherwise it downloads when you scan.',
+    preparingOffline: (percent) => `Downloading the reader… ${percent}%`,
     interruptedScan: (phase) =>
       `The last scan closed while ${phase}. This usually means the device ran out of memory: close other tabs and try a smaller photo.`,
     interruptedScanPhoto: (megapixels) =>
