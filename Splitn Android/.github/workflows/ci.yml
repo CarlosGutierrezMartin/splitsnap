@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+
+defaults:
+  run:
+    working-directory: "Splitn Android"
+
+jobs:
+  check:
+    name: Typecheck y tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: "Splitn Android/package-lock.json"
+
+      - run: npm ci
+
+      # Se separan de `npm run build` para que el informe diga qué ha fallado
+      # exactamente: los tipos, los tests o el empaquetado.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build

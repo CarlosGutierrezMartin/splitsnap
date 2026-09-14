@@ -1,11 +1,19 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onAnimationStart' | 'onDragStart' | 'onDragEnd' | 'onDrag'> {
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   fullWidth?: boolean;
 }
 
-import { motion } from 'framer-motion';
+const VARIANTS: Record<NonNullable<ButtonProps['variant']>, string> = {
+  primary: 'bg-primary text-white hover:brightness-110 focus-visible:ring-primary shadow-lg shadow-primary/25',
+  secondary: 'bg-secondary text-white hover:brightness-110 focus-visible:ring-secondary shadow-lg shadow-secondary/25',
+  outline:
+    'border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus-visible:ring-gray-400 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800',
+  ghost: 'text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-400 dark:text-gray-300 dark:hover:bg-gray-800',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
+};
 
 export const Button: React.FC<ButtonProps> = ({
   children,
@@ -13,27 +21,14 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   className = '',
   ...props
-}) => {
-  const baseStyles = "inline-flex items-center justify-center px-4 py-3 rounded-xl font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
-
-  const variants = {
-    primary: "bg-primary text-white hover:bg-blue-600 focus:ring-blue-500 shadow-lg shadow-blue-200",
-    secondary: "bg-secondary text-white hover:bg-emerald-600 focus:ring-emerald-500 shadow-lg shadow-emerald-200",
-    outline: "border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 focus:ring-gray-500",
-    ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-  };
-
-  const widthStyle = fullWidth ? "w-full" : "";
-
-  return (
-    <motion.button
-      whileTap={{ scale: 0.97 }}
-      whileHover={{ scale: 1.01 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-      className={`${baseStyles} ${variants[variant]} ${widthStyle} ${className}`}
-      {...props}
-    >
-      {children}
-    </motion.button>
-  );
-};
+}) => (
+  <motion.button
+    whileTap={{ scale: 0.97 }}
+    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+    // min-h-11 mantiene el area tactil en el minimo recomendado de 44px.
+    className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold transition-[filter,background-color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-gray-950 ${VARIANTS[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}
+    {...props}
+  >
+    {children}
+  </motion.button>
+);

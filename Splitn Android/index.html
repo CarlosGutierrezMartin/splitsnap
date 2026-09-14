@@ -1,74 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" class="h-full">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Splitn</title>
-  <link rel="icon" type="image/png" href="/logo.png">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#2A7DE1', // Splitn Blue
-            secondary: '#10B981', // Emerald 500
-            background: '#F3F4F6', // Gray 100
-            surface: '#FFFFFF',
-          },
-          fontFamily: {
-            sans: ['Geist', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    /* Self-hosted Geist Variable Font */
-    @font-face {
-      font-family: 'Geist';
-      src: url('/fonts/Geist-Variable.woff2') format('woff2');
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: swap;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Splitn · Reparte la cuenta</title>
+  <meta name="description"
+    content="Escanea el ticket y reparte la cuenta. Funciona sin conexión y sin cuentas: todo se queda en tu móvil." />
 
-    /* Custom scrollbar for clean look */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
+  <meta name="theme-color" content="#2a7de1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#030712" media="(prefers-color-scheme: dark)" />
 
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
+  <!-- iOS no lee el manifest para esto: necesita sus propias etiquetas para
+       abrirse a pantalla completa desde el icono de inicio. -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Splitn" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 
-    ::-webkit-scrollbar-thumb {
-      background: #CBD5E1;
-      border-radius: 3px;
-    }
-
-    body {
-      background-color: #F3F4F6;
-      font-family: 'Geist', sans-serif;
-    }
-  </style>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
-  }
-}
-</script>
-  <link rel="stylesheet" href="/index.css">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+  <link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 
-<body>
+<body class="h-full">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

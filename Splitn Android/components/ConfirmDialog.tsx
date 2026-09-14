@@ -1,83 +1,57 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from './Button';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ConfirmDialogProps {
-    isOpen: boolean;
-    title: string;
-    description?: string;
-    confirmText?: string;
-    cancelText?: string;
-    isDestructive?: boolean;
-    onConfirm: () => void;
-    onCancel: () => void;
-    singleButton?: boolean; // Acts as Alert if true
+  open: boolean;
+  title: string;
+  description?: string | undefined;
+  confirmLabel?: string | undefined;
+  destructive?: boolean | undefined;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
-    isOpen,
-    title,
-    description,
-    confirmText = "Confirm",
-    cancelText = "Cancel",
-    isDestructive = false,
-    onConfirm,
-    onCancel,
-    singleButton = false
+  open, title, description, confirmLabel, destructive, onConfirm, onCancel,
 }) => {
-    if (!isOpen) return null;
+  const { t } = useLanguage();
 
-    return (
-        <AnimatePresence>
-            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                {/* Backdrop */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-                    onClick={singleButton ? onConfirm : onCancel}
-                />
-
-                {/* Dialog (iOS Style) */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ type: "spring", duration: 0.4, bounce: 0.3 }}
-                    className="relative w-full max-w-[270px] bg-[#F2F2F2]/90 dark:bg-gray-800/95 backdrop-blur-xl rounded-[14px] text-center overflow-hidden shadow-xl"
-                >
-                    <div className="p-4 grid gap-1">
-                        <h3 className="font-semibold text-[17px] leading-6 text-black dark:text-white">
-                            {title}
-                        </h3>
-                        {description && (
-                            <p className="text-[13px] leading-[18px] text-black/80 dark:text-gray-300">
-                                {description}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="border-t border-gray-300/50 dark:border-gray-700/50 flex">
-                        {!singleButton && (
-                            <>
-                                <button
-                                    onClick={onCancel}
-                                    className="flex-1 py-3 text-[17px] text-[#007AFF] dark:text-blue-400 font-normal hover:bg-black/5 dark:hover:bg-white/10 active:bg-black/10 dark:active:bg-white/20 transition-colors border-r border-gray-300/50 dark:border-gray-700/50"
-                                >
-                                    {cancelText}
-                                </button>
-                            </>
-                        )}
-                        <button
-                            onClick={onConfirm}
-                            className={`flex-1 py-3 text-[17px] font-semibold hover:bg-black/5 dark:hover:bg-white/10 active:bg-black/10 dark:active:bg-white/20 transition-colors ${isDestructive ? 'text-[#FF3B30] dark:text-red-400' : 'text-[#007AFF] dark:text-blue-400'
-                                }`}
-                        >
-                            {confirmText}
-                        </button>
-                    </div>
-                </motion.div>
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-4 backdrop-blur-sm sm:items-center"
+          onClick={onCancel}
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
+        >
+          <motion.div
+            initial={{ y: 40, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 40, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-3xl bg-white p-6 dark:bg-gray-900"
+          >
+            <h3 className="text-lg font-bold">{title}</h3>
+            {description && (
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{description}</p>
+            )}
+            <div className="mt-6 flex gap-3">
+              <Button variant="outline" fullWidth onClick={onCancel}>{t.common.cancel}</Button>
+              <Button
+                variant={destructive ? 'danger' : 'primary'}
+                fullWidth
+                onClick={onConfirm}
+                autoFocus
+              >
+                {confirmLabel ?? t.common.confirm}
+              </Button>
             </div>
-        </AnimatePresence>
-    );
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 };

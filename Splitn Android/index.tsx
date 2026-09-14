@@ -4,19 +4,21 @@ import './index.css';
 import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { registerSW } from 'virtual:pwa-register';
 
 const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
-}
+if (!rootElement) throw new Error('No se encontró el elemento raíz donde montar la app');
 
-const root = ReactDOM.createRoot(rootElement);
-root.render(
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ThemeProvider>
       <LanguageProvider>
         <App />
       </LanguageProvider>
     </ThemeProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
+
+// Actualiza en silencio en la siguiente apertura. Recargar de golpe mientras
+// alguien reparte una cuenta le haria perder el trabajo en curso.
+registerSW({ immediate: false });

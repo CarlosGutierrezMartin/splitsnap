@@ -1,0 +1,286 @@
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, ChevronDown, Split, X } from 'lucide-react';
+import { Button } from './Button';
+import { Avatar } from './Avatar';
+import { useLanguage } from '../contexts/LanguageContext';
+import { formatEuros } from '../ocr/money';
+import {
+  claimedParts, freeParts, isFullyClaimed, setInstanceParts, takeWholeUnit, togglePart,
+} from '../lib/split';
+import type { ItemInstance, Receipt } from '../types';
+
+interface AssignViewProps {
+  receipt: Receipt;
+  participantId: string;
+  onSave: (itemStates: Record<string, ItemInstance[]>) => void;
+  onCancel: () => void;
+}
+
+/** Denominadores ofrecidos al partir una unidad. Mas de 6 no se usa nunca. */
+const SPLIT_OPTIONS = [2, 3, 4, 5, 6];
+
+/**
+ * Pantalla donde una persona elige qué ha tomado.
+ *
+ * Se edita sobre una copia local y solo se persiste al guardar: así se puede
+ * cancelar sin dejar el reparto a medias.
+ */
+export const AssignView: React.FC<AssignViewProps> = ({ receipt, participantId, onSave, onCancel }) => {
+  const { t } = useLanguage();
+  const participant = receipt.participants.find((p) => p.id === participantId);
+
+  const [itemStates, setItemStates] = useState<Record<string, ItemInstance[]>>(() =>
+    structuredClone(receipt.itemStates),
+  );
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [splitting, setSplitting] = useState<{ itemId: string; index: number } | null>(null);
+
+  const myTotal = useMemo(() => {
+    let total = 0;
+    for (const item of receipt.items) {
+      for (const instance of itemStates[item.id] ?? []) {
+        const mine = instance.claims[participantId] ?? 0;
+        if (mine > 0) total += (item.unitPrice / Math.max(1, instance.totalParts)) * mine;
+      }
+    }
+    return Math.round(total * 100) / 100;
+  }, [itemStates, receipt.items, participantId]);
+
+  if (!participant) return null;
+
+  const mutate = (itemId: string, index: number, next: ItemInstance) => {
+    setItemStates((current) => {
+      const instances = current[itemId];
+      if (!instances?.[index]) return current;
+      const updated = [...instances];
+      updated[index] = next;
+      return { ...current, [itemId]: updated };
+    });
+  };
+
+  /** Nombre de quien ocupa una parte, para que se vea con quién se comparte. */
+  const otherHolders = (instance: ItemInstance): string[] =>
+    Object.keys(instance.claims)
+      .filter((id) => id !== participantId)
+      .map((id) => receipt.participants.find((p) => p.id === id)?.name)
+      .filter((name): name is string => Boolean(name));
+
+  return (
+    <div className="mx-auto w-full max-w-xl px-4 pb-32 animate-fade-in">
+      <header className="sticky top-0 z-30 -mx-4 mb-4 border-b border-gray-200 bg-white/95 px-4 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
+        <div className="flex items-center gap-3">
+          <Avatar name={participant.name} colorSeed={participant.colorSeed} />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              {t.assign.selectingFor}
+            </p>
+            <p className="truncate text-lg font-bold leading-tight">{participant.name}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              {t.assign.yourShare}
+            </p>
+            <p className="text-2xl font-black tabular-nums text-primary">{formatEuros(myTotal)}</p>
+          </div>
+        </div>
+      </header>
+
+      <ul className="space-y-2">
+        {receipt.items.map((item) => {
+          const instances = itemStates[item.id] ?? [];
+          const available = instances.filter((instance) => !isFullyClaimed(instance)).length;
+          const mineHere = instances.reduce(
+            (sum, instance) => sum + (instance.claims[participantId] ?? 0) / Math.max(1, instance.totalParts),
+            0,
+          );
+          const isOpen = expanded === item.id;
+          const exhausted = available === 0 && mineHere === 0;
+
+          return (
+            <li
+              key={item.id}
+              className={`overflow-hidden rounded-2xl border transition-colors ${
+                mineHere > 0
+                  ? 'border-primary bg-white ring-1 ring-primary/20 dark:bg-gray-900'
+                  : exhausted
+                    ? 'border-gray-200 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900/40'
+                    : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setExpanded(isOpen ? null : item.id)}
+                aria-expanded={isOpen}
+                className="flex w-full items-center gap-3 p-4 text-left"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-bold">{item.name}</p>
+                  <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                    {formatEuros(item.unitPrice)}
+                    {item.quantity > 1 && (
+                      <span className="ml-2">
+                        · {available > 0 ? t.assign.unitsLeft(available) : t.assign.allTaken}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                {mineHere > 0 && (
+                  <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white tabular-nums">
+                    {mineHere.toFixed(2).replace(/\.?0+$/, '')}
+                  </span>
+                )}
+                <ChevronDown
+                  className={`h-5 w-5 shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="border-t border-gray-100 dark:border-gray-800"
+                  >
+                    <div className="space-y-2 p-3">
+                      {instances.map((instance, index) => {
+                        const mine = instance.claims[participantId] ?? 0;
+                        const others = otherHolders(instance);
+                        const free = freeParts(instance);
+                        const locked = free === 0 && mine === 0;
+
+                        return (
+                          <div
+                            key={instance.instanceId}
+                            className={`rounded-xl border p-3 ${
+                              mine > 0
+                                ? 'border-primary/40 bg-primary/5'
+                                : 'border-gray-200 dark:border-gray-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold">
+                                  {item.quantity > 1 ? t.assign.unit(index + 1) : item.name}
+                                  {instance.totalParts > 1 && (
+                                    <span className="ml-1.5 text-xs font-normal text-gray-500">
+                                      · {t.assign.splitInto(instance.totalParts)}
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                                  {others.length > 0
+                                    ? `${t.assign.takenBy} ${others.join(', ')}`
+                                    : claimedParts(instance) === 0
+                                      ? t.assign.free
+                                      : ''}
+                                </p>
+                              </div>
+                              <span className="shrink-0 text-sm font-bold tabular-nums">
+                                {formatEuros(item.unitPrice / Math.max(1, instance.totalParts))}
+                              </span>
+                            </div>
+
+                            <div className="mt-2.5 flex gap-2">
+                              <button
+                                type="button"
+                                disabled={locked}
+                                onClick={() => mutate(item.id, index, togglePart(instance, participantId))}
+                                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors disabled:opacity-40 ${
+                                  mine > 0
+                                    ? 'bg-primary text-white'
+                                    : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'
+                                }`}
+                              >
+                                {mine > 0 && <Check className="h-4 w-4" aria-hidden="true" />}
+                                {instance.totalParts > 1
+                                  ? `${mine}/${instance.totalParts}`
+                                  : t.assign.takeWhole}
+                              </button>
+
+                              {instance.totalParts === 1 ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setSplitting({ itemId: item.id, index })}
+                                  className="flex min-h-10 items-center gap-1.5 rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                >
+                                  <Split className="h-4 w-4" aria-hidden="true" />
+                                  {t.assign.splitUnit}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => mutate(item.id, index, takeWholeUnit(instance, participantId))}
+                                  className="flex min-h-10 items-center rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                >
+                                  {t.assign.takeWhole}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Selector de en cuántas partes se divide una unidad. */}
+      <AnimatePresence>
+        {splitting && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 backdrop-blur-sm sm:items-center"
+            onClick={() => setSplitting(null)}
+          >
+            <motion.div
+              initial={{ y: 40 }} animate={{ y: 0 }} exit={{ y: 40 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-3xl bg-white p-5 dark:bg-gray-900"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-bold">{t.assign.splitUnit}</h3>
+                <button type="button" onClick={() => setSplitting(null)} aria-label={t.common.close} className="p-1 text-gray-400">
+                  <X className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {SPLIT_OPTIONS.map((parts) => (
+                  <button
+                    key={parts}
+                    type="button"
+                    onClick={() => {
+                      const instance = itemStates[splitting.itemId]?.[splitting.index];
+                      if (instance) {
+                        mutate(splitting.itemId, splitting.index, setInstanceParts(instance, parts, participantId));
+                      }
+                      setSplitting(null);
+                    }}
+                    className="aspect-square rounded-xl bg-gray-100 text-lg font-bold transition-colors hover:bg-primary hover:text-white dark:bg-gray-800"
+                  >
+                    {parts}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 p-4 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95">
+        <div className="mx-auto flex max-w-xl gap-3">
+          <Button variant="outline" onClick={onCancel}>{t.common.cancel}</Button>
+          <Button fullWidth className="py-4 text-lg" onClick={() => onSave(itemStates)}>
+            {t.assign.saveSelection}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
