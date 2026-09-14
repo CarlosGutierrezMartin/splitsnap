@@ -16,8 +16,10 @@ export const es: Translations = {
     deleteBody: 'Se borrará de este dispositivo y no se puede deshacer.',
     items: (count) => (count === 1 ? '1 artículo' : `${count} artículos`),
     offlineReady: 'Funciona sin conexión',
-    interruptedScan:
-      'El escaneo anterior se interrumpió y la app se reinició. Suele pasar por falta de memoria: cierra otras pestañas y prueba con una foto más pequeña.',
+    interruptedScan: (phase) =>
+      `El escaneo anterior se cerró mientras estaba ${phase}. Suele ser falta de memoria: cierra otras pestañas y prueba con una foto más pequeña.`,
+    interruptedScanPhoto: (megapixels) =>
+      `La foto tenía unos ${megapixels} megapíxeles. Por encima de 8 conviene reducirla.`,
   },
   capture: {
     title: 'Haz una foto del ticket',
@@ -116,8 +118,10 @@ export const en: Translations = {
     deleteBody: "It will be removed from this device and can't be undone.",
     items: (count) => (count === 1 ? '1 item' : `${count} items`),
     offlineReady: 'Works offline',
-    interruptedScan:
-      'The last scan was interrupted and the app restarted. This usually means the device ran out of memory: close other tabs and try a smaller photo.',
+    interruptedScan: (phase) =>
+      `The last scan closed while ${phase}. This usually means the device ran out of memory: close other tabs and try a smaller photo.`,
+    interruptedScanPhoto: (megapixels) =>
+      `The photo was around ${megapixels} megapixels. Above 8 it is worth shrinking it.`,
   },
   capture: {
     title: 'Take a photo of the receipt',

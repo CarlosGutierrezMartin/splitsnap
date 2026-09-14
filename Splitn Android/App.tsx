@@ -14,12 +14,14 @@ import { useLanguage } from './contexts/LanguageContext';
 import { loadOcrEngine, onOcrStatus, scanReceipt } from './ocr/engine';
 import { parseReceipt } from './ocr/parseReceipt';
 import { shareSummary } from './lib/share';
-import { consumeInterruptedScan, markScanFinished, markScanStarted } from './lib/crashReport';
+import {
+  consumeInterruptedScan, describePhase, markScanFinished, markScanPhase, markScanStarted,
+} from './lib/crashReport';
 import { AppState, type ParsedItem, type Receipt } from './types';
 import type { OcrStatus } from './ocr/types';
 
 function App() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const {
     receipt, history, loadingHistory, refreshHistory,
     createReceipt, openReceipt, closeReceipt, rename, replaceItems,
@@ -56,8 +58,11 @@ function App() {
       markScanStarted();
       try {
         const output = await scanReceipt(file);
+
+        markScanPhase('parse');
         const { items, detectedTotal } = parseReceipt(output.lines);
 
+        markScanPhase('render');
         createReceipt(items, { detectedTotal });
         setScreen(AppState.REVIEW);
       } catch (err) {
@@ -116,9 +121,14 @@ function App() {
 
       <main>
         {screen === AppState.HOME && crashed && (
-          <p className="mx-4 mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
-            {t.home.interruptedScan}
-          </p>
+          <div className="mx-4 mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+            <p>{t.home.interruptedScan(describePhase(crashed.phase, language))}</p>
+            {crashed.pixels !== undefined && (
+              <p className="mt-1 text-xs opacity-80">
+                {t.home.interruptedScanPhoto(Math.round(crashed.pixels / 1_000_000))}
+              </p>
+            )}
+          </div>
         )}
 
         {screen === AppState.HOME && (
