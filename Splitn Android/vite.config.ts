@@ -41,7 +41,14 @@ export default defineConfig({
     host: '0.0.0.0',
   },
   resolve: {
-    alias: { '@': path.resolve(import.meta.dirname, '.') },
+    alias: {
+      '@': path.resolve(import.meta.dirname, '.'),
+      // El punto de entrada por defecto de onnxruntime-web es el build JSEP,
+      // que arrastra WebGPU: 26,5 MB de wasm frente a 13,3 MB del build WASM
+      // puro. No usamos WebGPU (el motor arranca con `backend: 'wasm'`), asi
+      // que ese peso es heap desperdiciado en el movil ademas de descarga.
+      'onnxruntime-web': 'onnxruntime-web/wasm',
+    },
   },
   worker: {
     // El SDK de OCR arranca un module worker; sin esto Vite lo empaqueta en

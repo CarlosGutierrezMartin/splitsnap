@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { registerSW } from 'virtual:pwa-register';
 
 const rootElement = document.getElementById('root');
@@ -11,11 +12,13 @@ if (!rootElement) throw new Error('No se encontró el elemento raíz donde monta
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <LanguageProvider>
-        <App />
-      </LanguageProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <App />
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 );
 

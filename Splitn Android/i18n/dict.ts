@@ -16,6 +16,8 @@ export const es: Translations = {
     deleteBody: 'Se borrará de este dispositivo y no se puede deshacer.',
     items: (count) => (count === 1 ? '1 artículo' : `${count} artículos`),
     offlineReady: 'Funciona sin conexión',
+    interruptedScan:
+      'El escaneo anterior se interrumpió y la app se reinició. Suele pasar por falta de memoria: cierra otras pestañas y prueba con una foto más pequeña.',
   },
   capture: {
     title: 'Haz una foto del ticket',
@@ -114,6 +116,8 @@ export const en: Translations = {
     deleteBody: "It will be removed from this device and can't be undone.",
     items: (count) => (count === 1 ? '1 item' : `${count} items`),
     offlineReady: 'Works offline',
+    interruptedScan:
+      'The last scan was interrupted and the app restarted. This usually means the device ran out of memory: close other tabs and try a smaller photo.',
   },
   capture: {
     title: 'Take a photo of the receipt',

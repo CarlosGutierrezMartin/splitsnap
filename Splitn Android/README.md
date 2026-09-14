@@ -35,18 +35,18 @@ cuesta dinero y —a diferencia de un LLM— **se puede testear**: ver `ocr/__te
 | Qué | Cuándo se descarga | Tamaño |
 |---|---|---|
 | La aplicación | Al abrirla | ~420 KB |
-| SDK de OCR (hilo principal) | Al escanear por primera vez | 10,4 MB |
-| SDK de OCR (worker) | Al escanear por primera vez | 10,8 MB |
-| ONNX Runtime (build JSEP) | Al escanear por primera vez | 26,5 MB |
+| SDK de OCR + ONNX Runtime | Al escanear por primera vez | 10,6 MB |
+| Runtime WASM de ONNX | Al escanear por primera vez | 13,3 MB |
 | Modelos PP-OCRv5 (det + rec) | Al escanear por primera vez | 20,5 MB |
 
-**El primer escaneo descarga unos 68 MB.** Es mucho, y es el precio de hacer OCR en el
-dispositivo sin mandar la foto a ningún servidor. Solo se paga una vez: después queda en caché y la
-aplicación funciona sin conexión.
+**El primer escaneo descarga unos 44 MB.** Es el precio de hacer OCR en el dispositivo sin mandar la
+foto a ningún servidor. Solo se paga una vez: después queda en caché y la aplicación funciona sin
+conexión.
 
-Hay margen de mejora conocido: el SDK duplica ~10 MB entre hilo principal y worker, y ONNX Runtime
-podría servirse en su build sin JSEP (13,3 MB en vez de 26,5 MB) si se fija el punto de entrada
-`onnxruntime-web/wasm`. Ambas cosas están pendientes de evaluar.
+La inferencia corre en el hilo principal, no en un worker. El worker del SDK viene precompilado con su
+propia copia de ONNX Runtime en el build JSEP (11,3 MB + 26,5 MB, y dos heaps de WASM vivos a la vez),
+lo que en móviles de gama media provoca que el navegador cierre la pestaña por memoria. A cambio, la
+interfaz se congela durante el escaneo.
 
 ## Desarrollo
 
